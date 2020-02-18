@@ -142,3 +142,8 @@ kernel/configs/android-*.cfg
 
 out
 build.txt
+
+#
+#Ignoring Android.bp link file
+#
+Android.bp
