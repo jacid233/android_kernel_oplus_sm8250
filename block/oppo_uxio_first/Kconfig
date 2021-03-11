@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# Block layer core configuration
+#
+
+config OPLUS_FEATURE_UXIO_FIRST
+	bool "Support for oppo ux io first opt"
+	default y
+	help
+	  Enable oppo ux io first opt.

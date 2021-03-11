@@ -1,0 +1,1 @@
+obj-$(CONFIG_OPLUS_FEATURE_PROJECTINFO)	+=  boot_mode.o

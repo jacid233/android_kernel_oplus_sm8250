@@ -1,0 +1,6 @@
+#change 'y' to 'n', if you want fo close pmic monitor
+config OPLUS_FEATURE_PMIC_MONITOR
+    bool "oppo pmic monitor"
+    default n
+    help
+      define this config to init oppo pmic monitor.

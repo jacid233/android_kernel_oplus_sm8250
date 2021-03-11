@@ -1,0 +1,59 @@
+
+/ {
+        reserved-memory {
+                qtee_apps_region@81e00000 {
+                        no-map;
+                        //#ifndef VENDOR_EDIT
+                        /*Ran.Chen@Bsp.Fingerprint.Basic, 2019/09/11, expend tz memory to 62*/
+                        /*Ran.Chen@Bsp.Fingerprint.Basic, 2019/09/11, expend tz memory to 100*/
+                        //reg = <0x0 0x81e00000 0x0 0x2600000>;
+                        //#else
+                        reg = <0x0 0x81e00000 0x0 0x6800000>;
+                        //#endif /* VENDOR_EDIT */
+                };
+
+// #ifdef VENDOR_EDIT
+// Ran.Chen@Bsp.Fingerprint.Basic, 2019/09/11, expend tz memory to 100
+                pil_camera_region@86000000 {
+                        reg = <0x0 0x9b800000 0x0 0x500000>;
+                };
+
+                pil_npu_region@86500000 {
+                        reg = <0x0 0x9bd00000 0x0 0x500000>;
+                };
+
+                pil_video_region@86a00000 {
+                        reg = <0x0 0x9c200000 0x0 0x500000>;
+                };
+
+                pil_cvp_region@86f00000 {
+                        reg = <0x0 0x9c700000 0x0 0x500000>;
+                };
+
+                pil_cdsp_region@87400000 {
+                        reg = <0x0 0x9cc00000 0x0 0x1e00000>;
+                };
+// #endif
+                //#ifdef VENDOR_EDIT
+                //Wentian.Mai@PSW.NW.2256913, 2019/08/16
+                //#ifdef FEATURE_OPPO_NV_BACKUP
+                //add for oem share mem mapping virtual addr fail
+                ///*Ran.Chen@Bsp.Fingerprint.Basic, 2019/09/11, expend tz memory to 100*/
+                uio_mem: uio_mem_region {
+                        compatible = "removed-dma-pool";
+                        reg = <0x0 0x9ea00000 0x0 0x200000>;
+                };
+
+                ///*Ran.Chen@Bsp.Fingerprint.Basic, 2019/09/11, expend tz memory to 100*/
+                uio_oem: uio_oem_region {
+                        compatible = "removed-dma-pool";
+                        reg = <0x0 0x9ec00000 0x0 0x100000>;
+                };
+                //#endif /* FEATURE_OPPO_NV_BACKUP */
+                //#endif /* VENDOR_EDIT */
+        };
+};
+
+
+
+

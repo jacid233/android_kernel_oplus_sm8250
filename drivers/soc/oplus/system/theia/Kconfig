@@ -1,0 +1,7 @@
+#Gang.Yang@TECH.BSP.Stability.THEIA_PROJECT 2019/06/15, Add for THEIA_PROJECT
+#change 'y' to 'n', if you want fo close theia feature
+config OPLUS_FEATURE_THEIA
+    bool "oppo theia project"
+    default n
+    help
+      define this config to init oppo theia project.

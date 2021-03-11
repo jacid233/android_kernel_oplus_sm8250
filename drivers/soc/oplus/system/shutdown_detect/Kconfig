@@ -1,0 +1,6 @@
+config OPLUS_FEATURE_SHUTDOWN_DETECT
+	 bool "shutdown hang detect"
+	default n
+	depends on OPLUS_SYSTEM_KERNEL
+	help
+            define this config to enable shutdown_detect.

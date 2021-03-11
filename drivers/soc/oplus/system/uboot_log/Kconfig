@@ -1,0 +1,7 @@
+config OPLUS_FEATURE_UBOOT_LOG
+  bool "oppo system uboot log"
+  default n
+  depends on OPLUS_SYSTEM_KERNEL
+  help
+    define this config to enable QCOM platform uboot log .
+

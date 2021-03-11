@@ -1,0 +1,7 @@
+# ifdef OPLUS_FEATURE_SENSOR_CRASH_MONITOR
+# yajie.chen add for config oppo software common soft
+config OPLUS_FEATURE_SENSOR_CRASH_MONITOR
+bool "config record slpirst"
+help
+    define this config to count the slpi restart times.
+#endif

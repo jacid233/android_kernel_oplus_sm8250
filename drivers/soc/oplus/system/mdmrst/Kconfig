@@ -1,0 +1,4 @@
+config OPLUS_FEATURE_RECORD_MDMRST
+bool "config record mdmrst"
+help
+    define this config to count the modem restart times.

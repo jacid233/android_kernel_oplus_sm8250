@@ -1,0 +1,29 @@
+#Kui.Zhang@Bsp.Kernel.MM, 2020/05/19, Add for memleak test
+config OPPO_MEMLEAK_DETECT
+	string
+	default "$(OPPO_MEMLEAK_DETECT)"
+
+#/* Kui.Zhang@BSP.Kernel.MM, 2020-05-19, add debug switch.*/
+config MEMLEAK_DETECT_THREAD
+	bool "One kernel thread to detect memleak and dump infomation to log"
+	default y if OPPO_MEMLEAK_DETECT="true"
+	default n
+	help
+	  a daemon to monitor kernel memory leak.
+
+#/* Kui.Zhang@tec.kernel.mm, 2020-02-28, add CONFIG_VMALLOC_DEBUG.*/
+config VMALLOC_DEBUG
+	bool "trace vmalloc called information with a stack"
+	default n
+	help
+	  trace vmalloc called information with a stack.
+
+#/* Kui.Zhang@tec.kernel.mm, 2020-02-28, add CONFIG_KMALLOC_DEBUG.*/
+config KMALLOC_DEBUG
+	default n
+	bool "Enable Create kmalloc caches with debug flag" if EXPERT
+	depends on STACKTRACE && SLUB_DEBUG
+	help
+	  If kmalloc-* slab has memleak, will replace the kmalloc cache
+	  with a new kmalloc debug cache. The new kmalloc cache will enable
+	  SLAB_STORE_USER.

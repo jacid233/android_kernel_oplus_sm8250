@@ -1,0 +1,5 @@
+config OPLUS_FEATURE_DUMP_DEVICE_INFO
+  bool "config oppo dump device info"
+  default n
+  help
+	define this config to  dump device info.

@@ -1,0 +1,6 @@
+config OPLUS_FEATURE_QCOM_MINIDUMP_ENHANCE
+	 bool "qcom minidump enhance"
+	default n
+	depends on OPLUS_SYSTEM_KERNEL
+	help
+            define this config to enable qcom minidump enhance.

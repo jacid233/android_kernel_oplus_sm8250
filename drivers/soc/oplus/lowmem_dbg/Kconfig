@@ -1,0 +1,5 @@
+config OPLUS_FEATURE_LOWMEM_DBG
+        bool "OPPO Low Memory debug"
+        default n
+        help
+          print memory usage when low mem occurs.

@@ -1,0 +1,12 @@
+config OPPO_MULTI_KSWAPD
+       bool "Enable oppo multi kswapd"
+       default n
+       help
+         oppo multi kswapd
+
+config KSWAPD_UNBIND_MAX_CPU
+       bool "kswapd unbind to max capacity cpu"
+       default n
+       depends on OPPO_MULTI_KSWAPD
+       help
+         unbind to max capacity cpu

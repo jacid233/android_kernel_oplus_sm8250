@@ -1,0 +1,6 @@
+#/* Kui.Zhang@BSP.Kernel.MM, 2020-05-19, add debug switch.*/
+config DUMP_TASKS_MEM
+	bool "dump all userspace process meminfo"
+	default n
+	help
+	  dump all userspace process meminfo

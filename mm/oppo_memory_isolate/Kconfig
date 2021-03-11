@@ -1,0 +1,6 @@
+config OPPO_MEMORY_ISOLATE
+       bool "Enable oppo memory isolate to anti fragment"
+       depends on !CONFIG_VMAP_STACK
+       default n
+       help
+        Isolate memory to anti fragment.

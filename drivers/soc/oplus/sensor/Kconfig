@@ -1,0 +1,6 @@
+config OPLUS_FEATURE_SENSOR_CFG
+	tristate "oplus sensor share memory config"
+	default y
+	help
+	  To compile this driver as a module, set M in kernel build config
+	  module will be called oplus_sensor.
