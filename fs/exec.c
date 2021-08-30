@@ -1703,11 +1703,7 @@ static int exec_binprm(struct linux_binprm *bprm)
 	return ret;
 }
 
-#ifdef CONFIG_OPPO_SECURE_GUARD
-#if defined(CONFIG_OPPO_EXECVE_BLOCK) || defined(CONFIG_OPPO_EXECVE_REPORT)
-extern int oppo_exec_block(struct file *file);
-#endif /* CONFIG_OPPO_EXECVE_BLOCK or CONFIG_OPPO_EXECVE_REPORT */
-#endif /* CONFIG_OPPO_SECURE_GUARD */
+
 /*
  * sys_execve() executes a new program.
  */
@@ -1762,16 +1758,7 @@ static int __do_execve_file(int fd, struct filename *filename,
 	if (IS_ERR(file))
 		goto out_unmark;
 
-#ifdef CONFIG_OPPO_SECURE_GUARD
-#if defined(CONFIG_OPPO_EXECVE_BLOCK) || defined(CONFIG_OPPO_EXECVE_REPORT)
-	/*Yi.Zhang@Security, 2020-04-02, Add for execve blocking(root defence)*/
-    retval = oppo_exec_block(file);
-	if (retval){
-		fput(file);
-		goto out_unmark;
-	}
-#endif /* CONFIG_OPPO_EXECVE_BLOCK or CONFIG_OPPO_EXECVE_REPORT */
-#endif /* CONFIG_OPPO_SECURE_GUARD */
+
 	sched_exec();
 
 	bprm->file = file;

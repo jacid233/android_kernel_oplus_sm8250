@@ -58,10 +58,7 @@ obj-y += livepatch/
 obj-y += dma/
 
 
-#ifdef CONFIG_OPPO_SECURE_GUARD
-#Yi.Zhang@ROM.Security, 2020-4-19, add for kevent action upload,root action upload to user layer
-obj-$(CONFIG_OPPO_SECURE_GUARD) += keventupload/
-#endif /* CONFIG_OPPO_SECURE_GUARD */
+
 
 
 obj-$(CONFIG_CHECKPOINT_RESTORE) += kcmp.o

@@ -17,9 +17,7 @@
 #include <linux/err.h>
 #include <linux/string.h>
 #include <linux/sysfs.h>
-#ifdef CONFIG_OPPO_KEVENT_UPLOAD
-#include <linux/oppo_kevent.h>
-#endif
+
 #include <soc/oplus/system/kernel_fb.h>
 #include <linux/delay.h>
 #include <linux/mutex.h>

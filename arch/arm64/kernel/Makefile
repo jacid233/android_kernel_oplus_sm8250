@@ -69,7 +69,3 @@ ifeq ($(CONFIG_DEBUG_EFI),y)
 AFLAGS_head.o += -DVMLINUX_PATH="\"$(realpath $(objtree)/vmlinux)\""
 endif
 
-#ifdef CONFIG_OPPO_SECURE_GUARD
-#Yi.Zhang@Security, 2020-04-08, Add for prevent root check
-obj-$(CONFIG_OPPO_SECURE_GUARD)		+=  rootguard/
-#endif /* CONFIG_OPPO_SECURE_GUARD */
