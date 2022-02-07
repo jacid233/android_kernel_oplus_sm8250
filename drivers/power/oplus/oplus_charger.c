@@ -580,7 +580,7 @@ int oplus_battery_get_property(struct power_supply *psy,
 				if (!chip->authenticate) {
 					val->intval = POWER_SUPPLY_STATUS_NOT_CHARGING;
 				} else {
-					val->intval = chip->prop_status;
+					val->intval = chip->prop_status == POWER_SUPPLY_STATUS_NOT_CHARGING ? POWER_SUPPLY_STATUS_DISCHARGING : chip->prop_status;
 				}
 #ifndef CONFIG_OPLUS_CHARGER_MTK
 				if (oplus_wpc_get_online_status())
