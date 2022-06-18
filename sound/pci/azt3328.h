@@ -107,7 +107,7 @@ enum azf_freq_t {
 #undef AZF_FREQ
 };
 
-/** DirectX timer, main interrupt area (FIXME: and something else?) **/ 
+/** DirectX timer, main interrupt area (FIXME: and something else?) **i/
 #define IDX_IO_TIMER_VALUE	0x60 /* found this timer area by pure luck :-) */
   /* timer countdown value; triggers IRQ when timer is finished */
   #define TIMER_VALUE_MASK		0x000fffffUL

@@ -962,7 +962,6 @@ static int lg216x_get_frontend(struct dvb_frontend *fe,
 				&c->atscmh_parade_id);
 		if (lg_fail(ret))
 			goto fail;
-/* #else */
 		c->atscmh_parade_id = state->parade_id;
 #endif
 		ret = lg216x_get_nog(state,

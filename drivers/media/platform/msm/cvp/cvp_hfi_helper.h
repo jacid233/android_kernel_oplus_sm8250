@@ -287,11 +287,21 @@ struct cvp_hfi_client {
 	u32 transaction_id;
 	u32 data1;
 	u32 data2;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+/*LiuBo@Camera 20201029, apply qcom patch for case: 04896694, cvpDme_Async cost many times*/
+	u64 kdata;
+#else
 	u32 kdata1;
 	u32 kdata2;
+#endif
 	u32 reserved1;
 	u32 reserved2;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+/*LiuBo@Camera 20201029, apply qcom patch for case: 04896694, cvpDme_Async cost many times*/
+} __packed;
+#else
 };
+#endif
 
 struct cvp_hfi_client_d {
 	u32 transaction_id;
@@ -319,7 +329,12 @@ struct cvp_hfi_cmd_session_set_buffers_packet {
 	u32 session_id;
 	struct cvp_hfi_client client_data;
 	struct cvp_hfi_buf_type buf_type;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+/*LiuBo@Camera 20201029, apply qcom patch for case: 04896694, cvpDme_Async cost many times*/
+} __packed;
+#else
 };
+#endif
 
 struct cvp_hfi_cmd_session_set_buffers_packet_d {
 	u32 size;
@@ -339,7 +354,12 @@ struct cvp_session_release_buffers_packet {
 	u32 buffer_type;
 	u32 num_buffers;
 	u32 buffer_idx;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+/*LiuBo@Camera 20201029, apply qcom patch for case: 04896694, cvpDme_Async cost many times*/
+} __packed;
+#else
 };
+#endif
 
 struct cvp_session_release_buffers_packet_d {
 	u32 size;
@@ -357,7 +377,12 @@ struct cvp_hfi_cmd_session_hdr {
 	u32 session_id;
 	struct cvp_hfi_client client_data;
 	u32 stream_idx;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+/*LiuBo@Camera 20201029, apply qcom patch for case: 04896694, cvpDme_Async cost many times*/
+} __packed;
+#else
 };
+#endif
 
 struct cvp_hfi_msg_session_hdr {
 	u32 size;
@@ -366,7 +391,12 @@ struct cvp_hfi_msg_session_hdr {
 	u32 error_type;
 	struct cvp_hfi_client client_data;
 	u32 stream_idx;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+/*LiuBo@Camera 20201029, apply qcom patch for case: 04896694, cvpDme_Async cost many times*/
+} __packed;
+#else
 };
+#endif
 
 struct cvp_hfi_msg_session_hdr_d {
 	u32 size;
@@ -417,7 +447,12 @@ struct cvp_hfi_msg_session_op_cfg_packet {
 	struct cvp_hfi_client client_data;
 	u32 stream_idx;
 	u32 op_conf_id;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+/*LiuBo@Camera 20201029, apply qcom patch for case: 04896694, cvpDme_Async cost many times*/
+} __packed;
+#else
 };
+#endif
 
 struct cvp_hfi_msg_release_buffer_ref_event_packet {
 	u32 packet_buffer;
