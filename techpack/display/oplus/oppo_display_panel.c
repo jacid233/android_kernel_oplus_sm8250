@@ -226,7 +226,7 @@ err_class_create:
 	return rc;
 }
 
-void __exit oppo_display_panel_exit()
+static void __exit oppo_display_panel_exit()
 {
 	pr_err("%s\n", __func__);
 
