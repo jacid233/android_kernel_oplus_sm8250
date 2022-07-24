@@ -8,7 +8,7 @@
 #ifdef OPLUS_FEATURE_WIFI_BDF
 //
 //
-#include <soc/oppo/oppo_project.h>
+#include <soc/oplus/system/oplus_project.h>
 #include <linux/fs.h>
 #endif /* OPLUS_FEATURE_WIFI_BDF */
 

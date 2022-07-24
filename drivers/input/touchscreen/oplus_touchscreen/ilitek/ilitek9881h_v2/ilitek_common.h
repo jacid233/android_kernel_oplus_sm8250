@@ -62,7 +62,7 @@
 #include <linux/syscalls.h>
 
 #include "../../touchpanel_common.h"
-#include <soc/oplus/oplus_project.h>
+#include <soc/oplus/system/oplus_project.h>
 
 /*
  * Relative Driver with Touch IC

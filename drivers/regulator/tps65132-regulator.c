@@ -26,9 +26,9 @@
 #include <linux/of_gpio.h>
 #include <linux/gpio.h>
 
-#include <soc/oppo/device_info.h>
-#include <soc/oppo/oppo_project.h>
-#include <soc/oppo/boot_mode.h>
+#include <soc/oplus/device_info.h>
+#include <soc/oplus/system/oplus_project.h>
+#include <soc/oplus/system/boot_mode.h>
 #include <linux/regmap.h>
 
 
