@@ -144,3 +144,7 @@ include/soc/oplus/oplus_wakelock_profiler.h
 #Ignoring Android.bp link file
 #
 Android.bp
+
+# Ignore toolchain and out
+toolchain/
+out/
