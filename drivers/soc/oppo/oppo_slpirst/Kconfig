@@ -1,0 +1,7 @@
+# ifdef VENDOR_EDIT
+# yajie.chen add for config oppo software common soft
+config RECORD_SLPIRST
+bool "config record slpirst"
+help
+    define this config to count the slpi restart times.
+#endif /* VENDOR_EDIT */

@@ -1,0 +1,5 @@
+config OPPO_SAUPWK
+       bool "config oppo saupwk feature"
+       default y
+       help
+       This selects saupwk driver
