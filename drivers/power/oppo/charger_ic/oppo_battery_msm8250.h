@@ -13,8 +13,8 @@
 #include <linux/regulator/driver.h>
 #include <linux/regulator/consumer.h>
 #include <linux/extcon-provider.h>
-#include "../../../../kernel/msm-4.19/drivers/power/supply/qcom/storm-watch.h"
-#include "../../../../kernel/msm-4.19/drivers/power/supply/qcom/battery.h"
+#include "../../../../drivers/power/supply/qcom/storm-watch.h"
+#include "../../../../drivers/power/supply/qcom/battery.h"
 
 #ifdef VENDOR_EDIT
 /* zhijie.Li@BSP.CHG.Basic, 2019/09/30,  Add for HVDCP charging */

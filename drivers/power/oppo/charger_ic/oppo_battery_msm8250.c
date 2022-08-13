@@ -29,10 +29,10 @@
 
 #ifdef VENDOR_EDIT
 /* zhangkun@BSP.CHG.Basic, 2019/03/25, Add for charging */
-#include "../../../../kernel/msm-4.19/drivers/power/supply/qcom/smb5-reg.h"
-#include "../../../../kernel/msm-4.19/drivers/power/supply/qcom/schgm-flash.h"
-#include "../../../../kernel/msm-4.19/drivers/power/supply/qcom/battery.h"
-#include "../../../../kernel/msm-4.19/drivers/power/supply/qcom/step-chg-jeita.h"
+#include "../../../../drivers/power/supply/qcom/smb5-reg.h"
+#include "../../../../drivers/power/supply/qcom/schgm-flash.h"
+#include "../../../../drivers/power/supply/qcom/battery.h"
+#include "../../../../drivers/power/supply/qcom/step-chg-jeita.h"
 #endif
 
 #include <linux/irq.h>
