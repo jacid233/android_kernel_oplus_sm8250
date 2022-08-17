@@ -1835,69 +1835,6 @@ void fw_update_thread(struct work_struct *work)
 	oplus_vooc_set_awake(chip, false);
 }
 
-void fw_update_thread_fix(struct work_struct *work)
-{
-	struct delayed_work *dwork = to_delayed_work(work);
-	struct oplus_vooc_chip *chip = container_of(dwork,
-		struct oplus_vooc_chip, fw_update_work_fix);
-	const struct firmware *fw = NULL;
-	int ret = 1;
-	int retry = 5;
-	char version[10];
-
-	if(chip->vooc_fw_update_newmethod) {
-		if(oplus_is_rf_ftm_mode()) {
-			chip->vops->fw_check_then_recover_fix(chip);
-			chip->mcu_update_ing_fix = false;
-			return;
-		}
-		 do {
-			ret = request_firmware_select(&fw, chip->fw_path, chip->dev);
-			if (!ret) {
-				break;
-			}
-		} while ((ret < 0) && (--retry > 0));
-		chg_debug(" retry times %d, chip->fw_path[%s]\n", 5 - retry, chip->fw_path);
-		if(!ret) {
-			chip->firmware_data =  fw->data + 80 /* header */;
-			chip->fw_data_count =  fw->size - 80 /* header */ - 128 /* footer */;
-			chip->fw_data_version = chip->firmware_data[chip->fw_data_count - 4];
-			chg_debug("count:0x%x, version:0x%x\n",
-				chip->fw_data_count, chip->fw_data_version);
-			if(chip->vops->fw_check_then_recover_fix) {
-				ret = chip->vops->fw_check_then_recover_fix(chip);
-				sprintf(version, "%d", chip->fw_data_version);
-				sprintf(chip->manufacture_info.version, "%s", version);
-				if (ret == FW_CHECK_MODE) {
-					chg_debug("update finish, then clean fastchg_dummy , fastchg_started, watch_dog\n");
-					chip->fastchg_dummy_started = false;
-					chip->fastchg_started = false;
-					chip->allow_reading = true;
-					del_timer(&chip->watchdog);
-				}
-			}
-			release_firmware(fw);
-			chip->firmware_data = NULL;
-		} else {
-			chg_debug("%s: fw_name request failed, %d\n", __func__, ret);
-		}
-	} else {
-		ret = chip->vops->fw_check_then_recover_fix(chip);
-		if (ret == FW_CHECK_MODE) {
-			chg_debug("update finish, then clean fastchg_dummy , fastchg_started, watch_dog\n");
-			chip->fastchg_dummy_started = false;
-			chip->fastchg_started = false;
-			chip->allow_reading = true;
-			del_timer(&chip->watchdog);
-		}
-	}
-	chip->mcu_update_ing = false;
-	oplus_chg_clear_chargerid_info();
-	oplus_chg_unsuspend_charger();
-	oplus_vooc_set_awake(chip, false);
-	chip->mcu_update_ing_fix = false;
-}
-
 #define FASTCHG_FW_INTERVAL_INIT	   1000	/*  1S     */
 void oplus_vooc_fw_update_work_init(struct oplus_vooc_chip *chip)
 {
@@ -1913,20 +1850,6 @@ void oplus_vooc_bypass_work(void)
 	} else {
 		schedule_delayed_work(&g_vooc_chip->mcu_ctrl_cp_work, 0);
 	}
-}
-
-void oplus_vooc_fw_update_work_plug_in(void)
-{
-	if (!g_vooc_chip)
-		return;
-	chg_err("%s asic didn't work, update fw!\n", __func__);
-	if (g_vooc_chip->mcu_update_ing_fix == true) {
-		chg_err("%s check asic fw work already runing, return !\n", __func__);
-		return;
-	}
-	g_vooc_chip->mcu_update_ing_fix = true;
-	INIT_DELAYED_WORK(&g_vooc_chip->fw_update_work_fix, fw_update_thread_fix);
-	schedule_delayed_work(&g_vooc_chip->fw_update_work_fix, round_jiffies_relative(msecs_to_jiffies(FASTCHG_FW_INTERVAL_INIT)));
 }
 
 void oplus_vooc_shedule_fastchg_work(void)
@@ -2081,7 +2004,6 @@ void oplus_vooc_init(struct oplus_vooc_chip *chip)
 			return;
 		}
 		INIT_DELAYED_WORK(&chip->fw_update_work, fw_update_thread);
-		INIT_DELAYED_WORK(&chip->fw_update_work_fix, fw_update_thread_fix);
 		//Alloc fw_name/devinfo memory space
 
 		chip->fw_path = kzalloc(MAX_FW_NAME_LENGTH, GFP_KERNEL);

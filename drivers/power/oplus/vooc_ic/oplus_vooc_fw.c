@@ -1422,49 +1422,21 @@ void switch_fast_chg(struct oplus_vooc_chip *chip)
 	}
 
 	if (is_allow_fast_chg_dummy(chip) == true) {
-		if (!chip->vooc_switch_reset) {
-			if (oplus_vooc_get_adapter_update_status() == ADAPTER_FW_UPDATE_FAIL) {
-				oplus_vooc_delay_reset_mcu(chip);
-				opchg_set_switch_mode(chip, VOOC_CHARGER_MODE);
+		if (oplus_vooc_get_adapter_update_status() == ADAPTER_FW_UPDATE_FAIL) {
+			opchg_set_switch_mode(chip, VOOC_CHARGER_MODE);
+			oplus_vooc_delay_reset_mcu(chip);
+		} else {
+			if (oplus_vooc_get_fastchg_allow() == false
+					&& oplus_vooc_get_fastchg_to_warm() == true) {
+				chg_debug(" fastchg_allow false, to_warm true, don't switch to vooc mode\n");
 			} else {
-				if (oplus_vooc_get_fastchg_allow() == false
-						&& oplus_vooc_get_fastchg_to_warm() == true) {
-					chg_err(" fastchg_allow false, to_warm true, don't switch to vooc mode\n");
-				} else {
-					opchg_set_clock_sleep(chip);
-					oplus_vooc_reset_mcu();
-					opchg_set_switch_mode(chip, VOOC_CHARGER_MODE);
-
-					if(opchg_get_mcu_update_state() == false
-						&& oplus_vooc_check_asic_fw_status() == 0){
-						chg_err("check fw fail, go to update fw!\n");
-						oplus_chg_set_chargerid_switch_val(0);
-						opchg_set_switch_mode(chip, NORMAL_CHARGER_MODE);
-						oplus_chg_clear_chargerid_info();
-						oplus_vooc_fw_update_work_plug_in();
-					}
-				}
-			}
-		} else {	/* first switch vooc mode and then reset mcu, like Mufusa and Simba */
-			if (oplus_vooc_get_adapter_update_status() == ADAPTER_FW_UPDATE_FAIL) {
 				opchg_set_switch_mode(chip, VOOC_CHARGER_MODE);
-				oplus_vooc_delay_reset_mcu(chip);
-			} else {
-				if (oplus_vooc_get_fastchg_allow() == false
-						&& oplus_vooc_get_fastchg_to_warm() == true) {
-					chg_err(" fastchg_allow false, to_warm true, don't switch to vooc mode\n");
-				} else {
-					opchg_set_switch_mode(chip, VOOC_CHARGER_MODE);
-					if(oplus_chg_get_chargerid_switch_val() == 0) {
-						oplus_chg_set_chargerid_switch_val(1);
-					}
-					opchg_set_clock_sleep(chip);
-					opchg_set_reset_active(chip);
-				}
+				opchg_set_clock_sleep(chip);
+				opchg_set_reset_active(chip);
 			}
 		}
 	}
-	chg_err(" end, allow_fast_chg:%d\n", oplus_vooc_get_fastchg_allow());
+	chg_debug(" end, allow_fast_chg:%d\n", oplus_vooc_get_fastchg_allow());
 }
 
 int oplus_vooc_get_ap_clk_gpio_val(struct oplus_vooc_chip *chip)
