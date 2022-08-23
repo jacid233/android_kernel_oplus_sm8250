@@ -542,11 +542,12 @@ static void tx_macro_unlock_sleep(struct tx_macro_priv *tx_priv)
 		 * if tx_macro_lock_sleep failed, pm_state would be still
 		 * tx_macro_PM_ASLEEP, don't overwrite
 		 */
-		if (likely(tx_priv->pm_state == TX_MACRO_PM_AWAKE))
+		if (likely(tx_priv->pm_state == TX_MACRO_PM_AWAKE)) {
 			tx_priv->pm_state = TX_MACRO_PM_SLEEPABLE;
 			pm_qos_update_request(&tx_priv->pm_qos_req,
 						PM_QOS_DEFAULT_VALUE);
 			pm_relax(tx_priv->dev);
+			}
 	}
 	mutex_unlock(&tx_priv->pm_lock);
 	wake_up_all(&tx_priv->pm_wq);
