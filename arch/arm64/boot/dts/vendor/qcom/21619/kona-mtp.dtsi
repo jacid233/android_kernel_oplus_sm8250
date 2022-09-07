@@ -158,7 +158,6 @@
 		chipset-21619 = "SN100T";
 		chipset-2169A = "SN100T";
 		chipset-2169B = "SN100T";
-		chipset-2161A = "SN100T";
 	};
 	//#endif /* OPLUS_FEATURE_CONNFCSOFT */
 
@@ -1689,6 +1688,7 @@ board_temp-usr {
 		qcom,vooc-low-temp = <0>;
 		qcom,oplus_batt_4400mv;
 		qcom,support_vooc_by_normal_charger_path;
+		qcom,supported_hiz_gnd_cable;
 		qcom,vooc_fw_update_newmethod;
 		qcom,vooc-high-temp = <430>;
 		qcom,vooc-low-soc = <1>;
@@ -1865,6 +1865,7 @@ board_temp-usr {
 			qcom,qc3-disable;
 			qcom,hvdcp-disable;
 			qcom,smart_charging_screenoff;
+			qcom,supported_hiz_gnd_cable;
 			//io-channels = <&pm8150b_vadc ADC_GPIO3>;
 			//io-channel-names = "chgID_voltage_adc";
 			//qcom,otg-cl-ua = <2000000>;
@@ -2044,7 +2045,6 @@ board_temp-usr {
 			qcom,chg_ctrl_by_camera;
 			qcom,sw_vfloat_over_protect_enable;
 			qcom,lpd-disable;
-			qcom,vooc_enable_charger_first;
 
 			//for PD9V or QC9V
 			qcom,vbatt_pdqc_to_5v_thr = <4100>;
