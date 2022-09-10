@@ -14,17 +14,11 @@
 
 static bool arch_of_qcom(void)
 {
-#ifdef CONFIG_OPLUS_SYSTEM_KERNEL_QCOM
 	return true;
-#endif
-	return false;
 }
 
 static bool arch_of_mtk(void)
 {
-#ifdef CONFIG_OPLUS_SYSTEM_KERNEL_MTK
-	return true;
-#endif
 	return false;
 }
 

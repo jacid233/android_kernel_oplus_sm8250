@@ -17,10 +17,6 @@
 
 #include <soc/oplus/system/oplus_project.h>
 
-#ifdef CONFIG_MTK_SECURITY_SW_SUPPORT
-#include <sec_boot_lib.h>
-#endif
-
 #define SMEM_PROJECT    135
 
 #define UINT2Ptr(n)        (uint32_t *)(n)

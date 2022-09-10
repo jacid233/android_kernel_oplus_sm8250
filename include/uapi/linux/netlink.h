@@ -37,10 +37,6 @@
 #define NETLINK_OPLUS_NF_HOOKS	32
 #endif /* OPLUS_FEATURE_WIFI_LUCKYMONEY */
 
-#ifdef OPLUS_FEATURE_HANS_FREEZE
-#define NETLINK_OPPO_HANS       29      /* Socket for freezing solution*/
-#endif /*OPLUS_FEATURE_HANS_FREEZE*/
-
 //Add for apps network monitors
 #define NETLINK_OPLUS_APPS_MONITOR  35      /* Apps monitor NETLINK SOCK */
 //#endif /* VENDOR_EDIT */
@@ -64,10 +60,6 @@
 //#ifdef OPLUS_FEATURE_IPV6_OPTIMIZE
 #define NETLINK_OPLUS_IPV6_RTO  42
 //#endif /* OPLUS_FEATURE_IPV6_OPTIMIZE */
-
-//#ifdef OPLUS_FEATURE_THEIA
-//should match with oppo_theia/include/TheiaKeventThread.h define
-#define OPLUS_NETLINK_THEIA_KEVENT 43
 
 //#define MAX_LINKS 40
 #define MAX_LINKS 44
