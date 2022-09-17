@@ -71,8 +71,7 @@ OPLUS_FEATURE_WIFI_OPLUSWFD \
 OPLUS_FEATURE_WIFI_DUALSTA_AP_BLACKLIST \
 OPLUS_FEATURE_WIFI_DCS_SWITCH \
 OPLUS_FEATURE_APP_MONITOR \
-OPLUS_FEATURE_MIC_VA_MIC_CLK_SWITCH \
-OPLUS_FEATURE_ADFR
+OPLUS_FEATURE_MIC_VA_MIC_CLK_SWITCH
 
 $(foreach myfeature,$(ALLOWED_MCROS),\
          $(warning make $(myfeature) to be a macro here) \
@@ -85,5 +84,4 @@ $(foreach myfeature,$(ALLOWED_MCROS),\
 # BSP team can do customzation by referring the feature variables
 
 export OPLUS_FEATURE_WIFI_ROUTERBOOST=y
-export OPLUS_FEATURE_ADFR_KERNEL=yes
 export OPLUS_FEATURE_PXLW_IRIS5=yes

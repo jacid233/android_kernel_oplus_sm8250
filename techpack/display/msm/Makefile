@@ -162,8 +162,4 @@ msm_drm-$(CONFIG_DRM_OPLUS) += ../oplus/oplus_dsi_support.o \
 	../oplus/oplus_display_panel_cabc.o \
 #endif /*OPLUS_BUG_STABILITY*/
 
-ifeq ($(OPLUS_FEATURE_ADFR_KERNEL),yes)
-msm_drm-$(CONFIG_DRM_OPLUS) += ../oplus/oplus_adfr.o
-endif #/* OPLUS_FEATURE_ADFR_KERNEL */
-
 obj-$(CONFIG_DRM_FBDEV_EMULATION) += msm_fbdev.o
