@@ -17,9 +17,9 @@
 #if defined(OPLUS_FEATURE_PXLW_IRIS5)
 /*Pixelworks@MULTIMEDIA.DISPLAY, 2020/06/02, Iris5 Feature*/
 #include <video/mipi_display.h>
-#include "dsi_iris5_api.h"
-#include "dsi_iris5_lightup.h"
-#include "dsi_iris5_loop_back.h"
+#include "../iris/dsi_iris5_api.h"
+#include "../iris/dsi_iris5_lightup.h"
+#include "../iris/dsi_iris5_loop_back.h"
 #endif
 
 int oppo_debug_max_brightness = 0;

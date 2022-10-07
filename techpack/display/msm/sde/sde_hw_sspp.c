@@ -14,7 +14,7 @@
 #include "sde_hw_reg_dma_v1_color_proc.h"
 #if defined(OPLUS_FEATURE_PXLW_IRIS5)
 #include "sde_encoder.h"
-#include "dsi_iris5_api.h"
+#include "../../iris/dsi_iris5_api.h"
 #endif
 
 #define SDE_FETCH_CONFIG_RESET_VALUE   0x00000087

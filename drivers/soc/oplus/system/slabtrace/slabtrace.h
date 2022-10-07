@@ -24,8 +24,8 @@
 #include <trace/events/kmem.h>
 
 #ifdef CONFIG_OPLUS_SYSTEM_KERNEL_QCOM
-#include <../../../../kernel/msm-4.19/mm/internal.h>
-#include <../../../../kernel/msm-4.19/mm/slab.h>
+#include <../../../../../mm/internal.h>
+#include <../../../../../mm/slab.h>
 #else
 #include <../../../../../kernel-4.19/mm/slab.h>
 #include <../../../../../kernel-4.19/mm/internal.h>

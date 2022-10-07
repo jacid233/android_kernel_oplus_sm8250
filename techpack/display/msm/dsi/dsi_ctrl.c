@@ -28,7 +28,7 @@
 #endif /* OPLUS_BUG_STABILITY */
 #if defined(OPLUS_FEATURE_PXLW_IRIS5)
 // Pixelworks@MULTIMEDIA.DISPLAY, 2020/07/09, Iris5 Feature
-#include "dsi_iris5_api.h"
+#include "../../iris/dsi_iris5_api.h"
 #endif
 
 #define DSI_CTRL_DEFAULT_LABEL "MDSS DSI CTRL"

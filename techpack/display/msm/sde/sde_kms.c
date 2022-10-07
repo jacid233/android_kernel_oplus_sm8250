@@ -51,7 +51,7 @@
 #include "sde_connector.h"
 
 #if defined(OPLUS_FEATURE_PXLW_IRIS5)
-#include "dsi_iris5_api.h"
+#include "../../iris/dsi_iris5_api.h"
 #endif
 #include <soc/qcom/scm.h>
 #include "soc/qcom/secure_buffer.h"

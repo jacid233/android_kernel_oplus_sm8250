@@ -15,9 +15,9 @@
 #if defined(OPLUS_FEATURE_PXLW_IRIS5)
 /*Pixelworks@MULTIMEDIA.DISPLAY, 2020/06/02, Iris5 Feature*/
 #include <video/mipi_display.h>
-#include "dsi_iris5_api.h"
-#include "dsi_iris5_lightup.h"
-#include "dsi_iris5_loop_back.h"
+#include "../iris/dsi_iris5_api.h"
+#include "../iris/dsi_iris5_lightup.h"
+#include "../iris/dsi_iris5_loop_back.h"
 #endif
 
 PANEL_VOLTAGE_BAK panel_vol_bak[PANEL_VOLTAGE_ID_MAX] = {{0}, {0}, {2, 0, 1, 2, ""}};
