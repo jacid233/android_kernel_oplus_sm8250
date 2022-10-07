@@ -8,3 +8,4 @@ config RMNET_PERF
 	depends on RMNET
 	---help---
 	  performance mode of rmnet driver
+	  
