@@ -140,3 +140,5 @@ kernel/configs/android-*.cfg
 drivers/soc/oplus/owakelock
 include/soc/oplus/oplus_wakelock_profiler.h
 
+out
+build.txt
