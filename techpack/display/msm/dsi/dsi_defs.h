@@ -391,8 +391,27 @@ enum dsi_cmd_set_type {
 #endif
 #endif
 
+#ifdef OPLUS_FEATURE_ADFR
+	DSI_CMD_QSYNC_MIN_FPS_0,
+	DSI_CMD_QSYNC_MIN_FPS_1,
+	DSI_CMD_QSYNC_MIN_FPS_2,
+	DSI_CMD_QSYNC_MIN_FPS_3,
+	DSI_CMD_QSYNC_MIN_FPS_4,
+	DSI_CMD_QSYNC_MIN_FPS_5,
+	DSI_CMD_QSYNC_MIN_FPS_6,
+	DSI_CMD_QSYNC_MIN_FPS_7,
+	DSI_CMD_QSYNC_MIN_FPS_8,
+	DSI_CMD_QSYNC_MIN_FPS_9,
+	DSI_CMD_FAKEFRAME,
+	DSI_CMD_ADFR_PRE_SWITCH,
+#endif
+
 	DSI_CMD_SET_MAX
 };
+
+#ifdef OPLUS_FEATURE_ADFR
+#define DSI_CMD_QSYNC_MIN_FPS_COUNTS 10
+#endif
 
 /**
  * enum dsi_cmd_set_state - command set state
@@ -715,6 +734,16 @@ struct dsi_display_mode_priv_info {
 	int fod_on_vblank;
 	int fod_off_vblank;
 #endif /* OPLUS_BUG_STABILITY */
+
+#ifdef OPLUS_FEATURE_ADFR
+	u32 qsync_min_fps_sets_size;
+	u32 qsync_min_fps_sets[DSI_CMD_QSYNC_MIN_FPS_COUNTS];
+	u32 current_qsync_mode;
+	// fakeframe_config: 0st Bit:firsttime 1st Bit:secondtime, 1:enable 0:disable
+	// for example, 3 mean both first and second time should send fake frame
+	u32 fakeframe_config;
+	u32 deferred_fakeframe_time;
+#endif
 };
 
 /**
@@ -730,6 +759,9 @@ struct dsi_display_mode {
 	struct dsi_mode_info timing;
 	u32 pixel_clk_khz;
 	u32 dsi_mode_flags;
+#ifdef OPLUS_FEATURE_ADFR
+	u32 vsync_source;
+#endif /*OPLUS_FEATURE_ADFR*/
 	enum dsi_op_mode panel_mode;
 	bool is_preferred;
 	bool splash_dms;

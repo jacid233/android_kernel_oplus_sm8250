@@ -85,6 +85,10 @@ static void convert_to_dsi_mode(const struct drm_display_mode *drm_mode,
 		dsi_mode->panel_mode = DSI_OP_VIDEO_MODE;
 	if (drm_mode->flags & DRM_MODE_FLAG_CMD_MODE_PANEL)
 		dsi_mode->panel_mode = DSI_OP_CMD_MODE;
+
+#ifdef OPLUS_FEATURE_ADFR
+	dsi_mode->vsync_source = (drm_mode->flags & DRM_MODE_FLAG_VSYNCE_SOURCE_MASK) >> 25;
+#endif /*OPLUS_FEATURE_ADFR*/
 }
 
 void dsi_convert_to_drm_mode(const struct dsi_display_mode *dsi_mode,
@@ -139,10 +143,22 @@ void dsi_convert_to_drm_mode(const struct dsi_display_mode *dsi_mode,
 	if (dsi_mode->panel_mode == DSI_OP_CMD_MODE)
 		drm_mode->flags |= DRM_MODE_FLAG_CMD_MODE_PANEL;
 
+#ifdef OPLUS_FEATURE_ADFR
+	if (dsi_mode->vsync_source >= 0 && dsi_mode->vsync_source <= 15) {
+		drm_mode->flags |= (dsi_mode->vsync_source << 25) & DRM_MODE_FLAG_VSYNCE_SOURCE_MASK;
+	}
+#endif /*OPLUS_FEATURE_ADFR*/
+
 	/* set mode name */
+#ifndef OPLUS_FEATURE_ADFR
 	snprintf(drm_mode->name, DRM_DISPLAY_MODE_LEN, "%dx%dx%dx%d%s",
 			drm_mode->hdisplay, drm_mode->vdisplay,
 			drm_mode->vrefresh, drm_mode->clock,
+#else
+	snprintf(drm_mode->name, DRM_DISPLAY_MODE_LEN, "%dx%dx%dx%dx%d%s",
+			drm_mode->hdisplay, drm_mode->vdisplay,
+			drm_mode->vrefresh, drm_mode->clock, dsi_mode->vsync_source,
+#endif /*OPLUS_FEATURE_ADFR*/
 			video_mode ? "vid" : "cmd");
 }
 

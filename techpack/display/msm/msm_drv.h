@@ -210,6 +210,10 @@ enum msm_mdp_conn_property {
 	CONNECTOR_PROP_QSYNC_MODE,
 	CONNECTOR_PROP_CMD_FRAME_TRIGGER_MODE,
 
+#ifdef OPLUS_FEATURE_ADFR
+	CONNECTOR_PROP_QSYNC_MIN_FPS,
+#endif
+
 	/* total # of properties */
 	CONNECTOR_PROP_COUNT
 };
@@ -579,6 +583,9 @@ struct msm_display_kickoff_params {
 struct msm_display_conn_params {
 	uint32_t qsync_mode;
 	bool qsync_update;
+#ifdef OPLUS_FEATURE_ADFR
+	uint32_t qsync_dynamic_min_fps;
+#endif
 };
 
 /**
@@ -655,6 +662,10 @@ struct msm_drm_private {
 
 	struct msm_drm_thread disp_thread[MAX_CRTCS];
 	struct msm_drm_thread event_thread[MAX_CRTCS];
+
+#ifdef OPLUS_FEATURE_ADFR
+	struct msm_drm_thread adfr_thread[MAX_CRTCS];
+#endif
 
 	struct task_struct *pp_event_thread;
 	struct kthread_worker pp_event_worker;

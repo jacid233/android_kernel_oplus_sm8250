@@ -35,6 +35,10 @@
 #endif
 #include "dsi_pwr.h"
 
+#ifdef OPLUS_FEATURE_ADFR
+#include "oplus_adfr.h"
+#endif
+
 #include "../../../drivers/input/oplus_fp_drivers/include/oplus_fp_common.h"
 
 extern int hbm_mode;
@@ -2283,6 +2287,19 @@ int dsi_display_oplus_set_power(struct drm_connector *connector,
 					&notifier_data);
 		}
 
+#ifdef OPLUS_FEATURE_ADFR
+		 /*switch to panel TE-VSYNC while enter aod scene*/
+		if (oplus_adfr_is_support()) {
+			if (power_mode == SDE_MODE_DPMS_LP1 &&
+				(get_oplus_display_power_status() == OPLUS_DISPLAY_POWER_ON ||
+				get_oplus_display_power_status() == OPLUS_DISPLAY_POWER_OFF)) {
+				if (oplus_adfr_get_vsync_mode() == OPLUS_DOUBLE_TE_VSYNC) {
+					sde_encoder_adfr_aod_fod_source_switch(display, OPLUS_TE_SOURCE_TE);
+				}
+			}
+		}
+#endif /* OPLUS_FEATURE_ADFR */
+
 		switch(get_oplus_display_scene()) {
 		case OPLUS_DISPLAY_NORMAL_SCENE:
 		case OPLUS_DISPLAY_NORMAL_HBM_SCENE:
@@ -2335,6 +2352,14 @@ int dsi_display_oplus_set_power(struct drm_connector *connector,
 					   &notifier_data);
 		if ((display->panel->power_mode == SDE_MODE_DPMS_LP1) ||
 			(display->panel->power_mode == SDE_MODE_DPMS_LP2)) {
+#ifdef OPLUS_FEATURE_ADFR
+			if (oplus_adfr_is_support()) {
+				/*switch to panel TP-VSYNC while exit aod scene*/
+				if (oplus_adfr_get_vsync_mode() == OPLUS_DOUBLE_TE_VSYNC) {
+					sde_encoder_adfr_aod_fod_source_switch(display, OPLUS_TE_SOURCE_TP);
+				}
+			}
+#endif /* OPLUS_FEATURE_ADFR */
 			if (sde_crtc_get_fingerprint_mode(connector->state->crtc->state)) {
 				mutex_lock(&display->panel->panel_lock);
 				dsi_display_clk_ctrl(display->dsi_clk_handle,
@@ -3598,6 +3623,11 @@ static DEVICE_ATTR(aod_area, S_IRUGO|S_IWUSR, oplus_display_get_aod_area, oplus_
 static DEVICE_ATTR(video, S_IRUGO|S_IWUSR, oplus_display_get_video, oplus_display_set_video);
 #endif /* OPLUS_FEATURE_AOD_RAMLESS */
 static DEVICE_ATTR(fp_state, S_IRUGO, oplus_display_get_fp_state, NULL);
+
+#ifdef OPLUS_FEATURE_ADFR
+static DEVICE_ATTR(adfr_debug, S_IRUGO|S_IWUSR, oplus_adfr_get_debug, oplus_adfr_set_debug);
+static DEVICE_ATTR(vsync_switch, S_IRUGO|S_IWUSR, oplus_get_vsync_switch, oplus_set_vsync_switch);
+#endif
 static DEVICE_ATTR(backlight_smooth, S_IRUGO|S_IWUSR, oplus_backlight_smooth_get_debug, oplus_backlight_smooth_set_debug);
 
 /*#ifdef OPLUS_BUG_STABILITY*/
@@ -3646,6 +3676,11 @@ static struct attribute *oplus_display_attrs[] = {
 	&dev_attr_aod_area.attr,
 	&dev_attr_video.attr,
 #endif /* OPLUS_FEATURE_AOD_RAMLESS */
+
+#ifdef OPLUS_FEATURE_ADFR
+	&dev_attr_adfr_debug.attr,
+	&dev_attr_vsync_switch.attr,
+#endif
 	&dev_attr_backlight_smooth.attr,
 
 /*#ifdef OPLUS_BUG_STABILITY*/

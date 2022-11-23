@@ -54,6 +54,10 @@ extern int msm_drm_notifier_call_chain(unsigned long val, void *v);
 extern int oplus_request_power_status;
 #endif
 
+#ifdef OPLUS_FEATURE_ADFR
+#include "oplus_adfr.h"
+#endif
+
 #if defined(OPLUS_FEATURE_PXLW_IRIS5)
 extern int igc_lut_update;
 #endif
@@ -2495,6 +2499,13 @@ static void sde_crtc_frame_event_work(struct kthread_work *work)
 		_sde_crtc_retire_event(fevent->connector, fevent->ts,
 				(fevent->event & SDE_ENCODER_FRAME_EVENT_ERROR)
 				? SDE_FENCE_SIGNAL_ERROR : SDE_FENCE_SIGNAL);
+
+
+#ifdef OPLUS_FEATURE_ADFR
+	if (oplus_adfr_is_support()) {
+		sde_crtc_adfr_handle_frame_event(crtc, fevent);
+	}
+#endif
 
 	if (fevent->event & SDE_ENCODER_FRAME_EVENT_PANEL_DEAD)
 		SDE_ERROR("crtc%d ts:%lld received panel dead event\n",

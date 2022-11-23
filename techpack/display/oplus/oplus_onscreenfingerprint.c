@@ -17,6 +17,9 @@
 #include "oplus_display_panel.h"
 #include "oplus_aod.h"
 #include "oplus_display_panel_cabc.h"
+#ifdef OPLUS_FEATURE_ADFR
+#include "oplus_adfr.h"
+#endif
 #define DSI_PANEL_OPLUS_DUMMY_VENDOR_NAME  "PanelVendorDummy"
 #define DSI_PANEL_OPLUS_DUMMY_MANUFACTURE_NAME  "dummy1024"
 
@@ -499,6 +502,17 @@ int dsi_panel_parse_oplus_config(struct dsi_panel *panel)
 	apollo_backlight_enable = utils->read_bool(utils->data,
 				"oplus,apollo_backlight_enable");
 	DSI_INFO("apollo_backlight_enable: %s", apollo_backlight_enable ? "true" : "false");
+
+#ifdef OPLUS_FEATURE_ADFR
+	if (oplus_adfr_is_support()) {
+		if (oplus_adfr_get_vsync_mode() == OPLUS_EXTERNAL_TE_TP_VSYNC) {
+			/* power on with vsync_switch_gpio high bacause default timing is fhd OA 60hz */
+			panel->vsync_switch_gpio_level = 1;
+			/* default resolution is FHD when use mux switch */
+			panel->cur_h_active = 1080;
+		}
+	}
+#endif /* OPLUS_FEATURE_ADFR */
 
 #ifdef CONFIG_REGULATOR_TPS65132
 	panel->oplus_priv.is_tps65132_support = utils->read_bool(utils->data,  "oplus,tps65132_support");

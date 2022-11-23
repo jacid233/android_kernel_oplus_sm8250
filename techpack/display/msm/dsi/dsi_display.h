@@ -287,6 +287,15 @@ struct dsi_display {
 	struct completion switch_te_gate;
 	bool vsync_switch_pending;
 #endif
+
+#ifdef OPLUS_FEATURE_ADFR
+	/* save qsync info, then restore qsync status after panel enable*/
+	bool need_qsync_restore;
+	/* force close qysnc window when qsync mode is on before panel enable */
+	bool force_qsync_mode_off;
+	uint32_t current_qsync_mode;
+	uint32_t current_qsync_dynamic_min_fps;
+#endif /* OPLUS_FEATURE_ADFR */
 };
 
 int dsi_display_dev_probe(struct platform_device *pdev);

@@ -297,6 +297,13 @@ struct dsi_panel {
 #endif
 	int power_mode;
 	enum dsi_panel_physical_type panel_type;
+#ifdef OPLUS_FEATURE_ADFR
+	int vsync_switch_gpio;
+	int vsync_switch_gpio_level;
+	bool force_te_vsync;
+	bool need_vsync_switch;
+	u32 cur_h_active;
+#endif /* OPLUS_FEATURE_ADFR */
 };
 
 static inline bool dsi_panel_ulps_feature_enabled(struct dsi_panel *panel)
