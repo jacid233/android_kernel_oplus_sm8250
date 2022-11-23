@@ -20,6 +20,9 @@
 #include "oplus_display_private_api.h"
 #include "oplus_dc_diming.h"
 #endif
+#ifdef OPLUS_FEATURE_ADFR
+#include "oplus_adfr.h"
+#endif
 
 #ifdef OPLUS_BUG_STABILITY
 #include "sde_trace.h"
@@ -825,8 +828,54 @@ void sde_connector_set_qsync_params(struct drm_connector *connector)
 					c_conn->qsync_mode, qsync_propval);
 			c_conn->qsync_updated = true;
 			c_conn->qsync_mode = qsync_propval;
+#ifdef OPLUS_FEATURE_ADFR
+			if (oplus_adfr_is_support()) {
+				if (c_conn->qsync_mode == SDE_RM_QSYNC_DISABLED) {
+					/* qsync disable need change min fps */
+					c_conn->qsync_curr_dynamic_min_fps = 0;
+					c_conn->qsync_deferred_window_status = SET_WINDOW_IMMEDIATELY;
+				} else {
+					/* qsync enable no need change window */
+					c_conn->qsync_dynamic_min_fps = 0;
+				}
+			}
+#endif /* OPLUS_FEATURE_ADFR */
 		}
 	}
+
+#ifdef OPLUS_FEATURE_ADFR
+	if (oplus_adfr_is_support()) {
+		/*
+		prop_dirty = msm_property_is_dirty(&c_conn->property_info,
+						&c_state->property_state,
+						CONNECTOR_PROP_QSYNC_MIN_FPS);
+		*/
+		prop_dirty = oplus_adfr_qsync_mode_minfps_is_updated();
+		if (prop_dirty) {
+			/*
+			qsync_propval = sde_connector_get_property(c_conn->base.state,
+							CONNECTOR_PROP_QSYNC_MIN_FPS);
+			*/
+			qsync_propval = oplus_adfr_get_qsync_mode_minfps();
+			if (oplus_adfr_has_auto_mode(qsync_propval)) {
+				SDE_DEBUG("kVRR updated for auto mode %08X\n", qsync_propval);
+			} else {
+				if (qsync_propval != c_conn->qsync_dynamic_min_fps) {
+					SDE_INFO("kVRR updated qsync min fps %d -> %d\n",
+							c_conn->qsync_dynamic_min_fps, qsync_propval);
+					c_conn->qsync_updated = true;
+					c_conn->qsync_curr_dynamic_min_fps = qsync_propval;
+					if (qsync_propval == 0) {
+						/* closing window immediately when qsync off */
+						c_conn->qsync_deferred_window_status = SET_WINDOW_IMMEDIATELY;
+					} else {
+						c_conn->qsync_deferred_window_status = DEFERRED_WINDOW_START;
+					}
+				}
+			}
+		}
+	}
+#endif /* OPLUS_FEATURE_ADFR */
 }
 
 void sde_connector_complete_qsync_commit(struct drm_connector *conn,
@@ -1031,6 +1080,11 @@ int sde_connector_prepare_commit(struct drm_connector *connector)
 	if (c_conn->qsync_updated) {
 		params.qsync_mode = c_conn->qsync_mode;
 		params.qsync_update = true;
+#ifdef OPLUS_FEATURE_ADFR
+		if (oplus_adfr_is_support()) {
+			params.qsync_dynamic_min_fps = c_conn->qsync_curr_dynamic_min_fps;
+		}
+#endif /* OPLUS_FEATURE_ADFR */
 	}
 
 	rc = c_conn->ops.prepare_commit(c_conn->display, &params);
@@ -1666,6 +1720,25 @@ static int sde_connector_atomic_set_property(struct drm_connector *connector,
 		msm_property_set_dirty(&c_conn->property_info,
 				&c_state->property_state, idx);
 		break;
+#ifdef OPLUS_FEATURE_ADFR
+	case CONNECTOR_PROP_QSYNC_MIN_FPS:
+		if (oplus_adfr_is_support()) {
+			SDE_INFO("kVRR set qsync minfps dirty with %llu[%08X]\n", val, val);
+
+			/* minfps maybe disappear after state change, so handle it early */
+			if (oplus_adfr_handle_auto_mode(val)) {
+				SDE_DEBUG("kVRR updated auto mode %08X\n", val);
+			} else {
+				oplus_adfr_handle_qsync_mode_minfps(val);
+				SDE_DEBUG("kVRR updated qsync mode minfps %08X\n", val);
+			}
+
+			msm_property_set_dirty(&c_conn->property_info,
+					&c_state->property_state, idx);
+		}
+		break;
+#endif
+
 	default:
 		break;
 	}
@@ -2190,6 +2263,12 @@ static int sde_connector_fill_modes(struct drm_connector *connector,
 
 	mode_count = drm_helper_probe_single_connector_modes(connector,
 			max_width, max_height);
+
+#ifdef OPLUS_FEATURE_ADFR
+	if (oplus_adfr_is_support()) {
+		drm_mode_sort_for_adfr(&connector->modes);
+	}
+#endif
 
 	rc = sde_connector_set_blob_data(connector,
 				connector->state,
@@ -2717,6 +2796,13 @@ static int _sde_connector_install_properties(struct drm_device *dev,
 					ARRAY_SIZE(e_qsync_mode),
 					CONNECTOR_PROP_QSYNC_MODE);
 
+#ifdef OPLUS_FEATURE_ADFR
+		/* add qsync min fps prop when DPU support and ADFR support */
+		if (sde_kms->catalog->has_qsync && oplus_adfr_is_support()) {
+			msm_property_install_range(&c_conn->property_info, "qsync_min_fps",
+					0x0, 0, ~0, 0, CONNECTOR_PROP_QSYNC_MIN_FPS);
+		}
+#endif
 		if (display_info->capabilities & MSM_DISPLAY_CAP_CMD_MODE)
 			msm_property_install_enum(&c_conn->property_info,
 				"frame_trigger_mode", 0, 0,

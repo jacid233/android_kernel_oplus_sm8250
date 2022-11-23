@@ -145,6 +145,10 @@ struct softiris_color
 #define PANEL_IOCTL_GET_SOFTIRIS_COLOR        PANEL_IOWR(0x53, struct softiris_color)
 #define PANEL_IOCTL_SET_DITHER_STATUS        PANEL_IOWR(0x54, unsigned int)
 #define PANEL_IOCTL_GET_DITHER_STATUS        PANEL_IOWR(0x55, unsigned int)
+#ifdef OPLUS_FEATURE_ADFR
+#define PANEL_IOCTL_SET_TE_REFCOUNT_ENABLE	  PANEL_IOW(0x56, unsigned int)
+#define PANEL_IOCTL_GET_TE_REFCOUNT_ENABLE	  PANEL_IOWR(0x57, unsigned int)
+#endif
 #define PANEL_IOCTL_SET_CABC_STATUS              PANEL_IOW(0x59, unsigned int)
 #define PANEL_IOCTL_GET_CABC_STATUS              PANEL_IOWR(0x5A, unsigned int)
 /*oplus ioctl case end*/

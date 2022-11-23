@@ -28,6 +28,10 @@
 #include "oplus_display_panel_cabc.h"
 #endif
 
+#ifdef OPLUS_FEATURE_ADFR
+#include "oplus_adfr.h"
+#include "sde_trace.h"
+#endif /* OPLUS_FEATURE_ADFR */
 #include "sde_dbg.h"
 
 /**
@@ -397,6 +401,17 @@ static int dsi_panel_gpio_request(struct dsi_panel *panel)
 	gpio_direction_input(r_config->panel_te_esd_gpio);
 #endif
 
+#ifdef OPLUS_FEATURE_ADFR
+	if (oplus_adfr_is_support()) {
+		if (gpio_is_valid(panel->vsync_switch_gpio)) {
+			rc = gpio_request(panel->vsync_switch_gpio, "vsync_switch_gpio");
+			if (rc) {
+				DSI_ERR("adfr request for vsync_switch_gpio failed, rc=%d\n", rc);
+			}
+		}
+	}
+#endif /*OPLUS_FEATURE_ADFR*/
+
 	goto error;
 error_release_mode_sel:
 	if (gpio_is_valid(panel->bl_config.en_gpio))
@@ -435,6 +450,13 @@ static int dsi_panel_gpio_release(struct dsi_panel *panel)
 	if (gpio_is_valid(r_config->panel_vout_gpio))
 		gpio_free(r_config->panel_vout_gpio);
 #endif
+
+#ifdef OPLUS_FEATURE_ADFR
+	if (oplus_adfr_is_support()) {
+		if (gpio_is_valid(panel->vsync_switch_gpio))
+			gpio_free(panel->vsync_switch_gpio);
+	}
+#endif /*OPLUS_FEATURE_ADFR*/
 
 	return rc;
 }
@@ -806,7 +828,13 @@ int dsi_panel_tx_cmd_set(struct dsi_panel *panel,
 #ifdef OPLUS_BUG_STABILITY
 	if (type != DSI_CMD_READ_SAMSUNG_PANEL_REGISTER_ON
 		&& type != DSI_CMD_READ_SAMSUNG_PANEL_REGISTER_OFF) {
+		#ifdef OPLUS_FEATURE_ADFR
+			if (type != DSI_CMD_FAKEFRAME) {
+			    pr_err("dsi_cmd %s\n", cmd_set_prop_map[type]);
+			}
+		#else
 		        pr_err("dsi_cmd %s\n", cmd_set_prop_map[type]);
+		#endif
 	}
 
 	if (oplus_seed_backlight) {
@@ -2408,6 +2436,21 @@ const char *cmd_set_prop_map[DSI_CMD_SET_MAX] = {
 	"iris,abyp-panel-command",
 #endif
 #endif /*OPLUS_BUG_STABILITY*/
+
+#ifdef OPLUS_FEATURE_ADFR
+	"qcom,mdss-dsi-qsync-min-fps-0-command",
+	"qcom,mdss-dsi-qsync-min-fps-1-command",
+	"qcom,mdss-dsi-qsync-min-fps-2-command",
+	"qcom,mdss-dsi-qsync-min-fps-3-command",
+	"qcom,mdss-dsi-qsync-min-fps-4-command",
+	"qcom,mdss-dsi-qsync-min-fps-5-command",
+	"qcom,mdss-dsi-qsync-min-fps-6-command",
+	"qcom,mdss-dsi-qsync-min-fps-7-command",
+	"qcom,mdss-dsi-qsync-min-fps-8-command",
+	"qcom,mdss-dsi-qsync-min-fps-9-command",
+	"qcom,mdss-dsi-fakeframe-command",
+	"qcom,mdss-dsi-adfr-pre-switch-command",
+#endif
 };
 
 const char *cmd_set_state_map[DSI_CMD_SET_MAX] = {
@@ -2509,6 +2552,21 @@ const char *cmd_set_state_map[DSI_CMD_SET_MAX] = {
 	"iris,abyp-panel-command-state",
 #endif
 #endif /*OPLUS_BUG_STABILITY*/
+
+#ifdef OPLUS_FEATURE_ADFR
+	"qcom,mdss-dsi-qsync-min-fps-0-command-state",
+	"qcom,mdss-dsi-qsync-min-fps-1-command-state",
+	"qcom,mdss-dsi-qsync-min-fps-2-command-state",
+	"qcom,mdss-dsi-qsync-min-fps-3-command-state",
+	"qcom,mdss-dsi-qsync-min-fps-4-command-state",
+	"qcom,mdss-dsi-qsync-min-fps-5-command-state",
+	"qcom,mdss-dsi-qsync-min-fps-6-command-state",
+	"qcom,mdss-dsi-qsync-min-fps-7-command-state",
+	"qcom,mdss-dsi-qsync-min-fps-8-command-state",
+	"qcom,mdss-dsi-qsync-min-fps-9-command-state",
+	"qcom,mdss-dsi-fakeframe-command-state",
+	"qcom,mdss-dsi-adfr-pre-switch-command-state",
+#endif
 };
 
 static int dsi_panel_get_cmd_pkt_count(const char *data, u32 length, u32 *cnt)
@@ -2972,6 +3030,15 @@ static int dsi_panel_parse_gpios(struct dsi_panel *panel)
 				 panel->name, rc);
 		}
 	}
+
+#ifdef OPLUS_FEATURE_ADFR
+	if (oplus_adfr_is_support()) {
+		panel->vsync_switch_gpio = utils->get_named_gpio(utils->data, "qcom,vsync-switch-gpio", 0);
+		if (!gpio_is_valid(panel->vsync_switch_gpio)) {
+			DSI_DEBUG("[%s] vsync_switch_gpio is not set, rc=%d\n", panel->name, rc);
+		}
+	}
+#endif /*OPLUS_FEATURE_ADFR*/
 
 	panel->reset_config.lcd_mode_sel_gpio = utils->get_named_gpio(
 		utils->data, mode_set_gpio_name, 0);
@@ -4759,6 +4826,12 @@ int dsi_panel_get_mode(struct dsi_panel *panel,
 			mode->panel_mode = panel->panel_mode;
 		}
 
+#ifdef OPLUS_FEATURE_ADFR
+		// ignore the return result
+		if (oplus_adfr_is_support()) {
+			dsi_panel_parse_adfr(mode, utils);
+		}
+#endif
 		mode->splash_dms = of_property_read_bool(child_np,
 				"qcom,mdss-dsi-splash-dms-switch-to-this-timing");
 	}
@@ -5202,7 +5275,12 @@ int dsi_panel_send_qsync_on_dcs(struct dsi_panel *panel,
 
 	mutex_lock(&panel->panel_lock);
 
+#ifdef OPLUS_FEATURE_ADFR
+	DSI_INFO("ctrl:%d qsync on\n", ctrl_idx);
+	SDE_ATRACE_INT("qsync_mode_cmd", 1);
+#else
 	DSI_DEBUG("ctrl:%d qsync on\n", ctrl_idx);
+#endif /* OPLUS_FEATURE_ADFR */
 	rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_QSYNC_ON);
 	if (rc)
 		DSI_ERR("[%s] failed to send DSI_CMD_SET_QSYNC_ON cmds rc=%d\n",
@@ -5217,14 +5295,24 @@ int dsi_panel_send_qsync_off_dcs(struct dsi_panel *panel,
 {
 	int rc = 0;
 
+#ifdef OPLUS_FEATURE_ADFR
+	if (!panel || !panel->cur_mode) {
+#else
 	if (!panel) {
+#endif /* OPLUS_FEATURE_ADFR */
 		DSI_ERR("invalid params\n");
 		return -EINVAL;
 	}
 
 	mutex_lock(&panel->panel_lock);
 
+#ifdef OPLUS_FEATURE_ADFR
+	DSI_INFO("ctrl:%d qsync off\n", ctrl_idx);
+	SDE_ATRACE_INT("qsync_mode_cmd", 0);
+	SDE_ATRACE_INT("oplus_adfr_qsync_mode_minfps_cmd", panel->cur_mode->timing.refresh_rate);
+#else
 	DSI_DEBUG("ctrl:%d qsync off\n", ctrl_idx);
+#endif /* OPLUS_FEATURE_ADFR */
 	rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_QSYNC_OFF);
 	if (rc)
 		DSI_ERR("[%s] failed to send DSI_CMD_SET_QSYNC_OFF cmds rc=%d\n",
@@ -5418,6 +5506,19 @@ int dsi_panel_switch(struct dsi_panel *panel)
 		gamma_switch(panel);
 #endif /*OPLUS_BUG_STABILITY*/
 
+#ifdef OPLUS_FEATURE_ADFR
+	if (oplus_adfr_is_support()) {
+		/* reset adfr auto mode status as panel mode will be change after timing switch */
+		dsi_panel_adfr_status_reset(panel);
+		if (oplus_adfr_get_vsync_mode() == OPLUS_EXTERNAL_TE_TP_VSYNC) {
+			oplus_adfr_resolution_vsync_switch(panel);
+		} else {
+			/* make sure the cur_h_active is the newest status */
+			panel->cur_h_active = panel->cur_mode->timing.h_active;
+		}
+	}
+#endif /* OPLUS_FEATURE_ADFR */
+
 	mutex_unlock(&panel->panel_lock);
 	return rc;
 }
@@ -5470,6 +5571,12 @@ int dsi_panel_enable(struct dsi_panel *panel)
 #endif
 	mutex_lock(&panel->panel_lock);
 
+#ifdef OPLUS_FEATURE_ADFR
+	if (oplus_adfr_is_support()) {
+		oplus_adfr_vsync_switch_reset(panel);
+	}
+#endif /* OPLUS_FEATURE_ADFR */
+
 #if defined(OPLUS_FEATURE_PXLW_IRIS5)
     if (iris_is_chip_supported())
         rc = iris_enable(panel, &(panel->cur_mode->priv_info->cmd_sets[DSI_CMD_SET_ON]));
@@ -5491,6 +5598,12 @@ int dsi_panel_enable(struct dsi_panel *panel)
 	if (rc)
 		DSI_ERR("Failed to write dimming gamma, rc=%d\n", rc);
 #endif /*OPLUS_BUG_STABILITY*/
+
+#ifdef OPLUS_FEATURE_ADFR
+	if (oplus_adfr_is_support()) {
+		dsi_panel_adfr_status_reset(panel);
+	}
+#endif /* OPLUS_FEATURE_ADFR */
 
 #if defined(OPLUS_FEATURE_PXLW_IRIS5)
 	if (panel->is_secondary) {

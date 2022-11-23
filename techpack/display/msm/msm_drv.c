@@ -51,6 +51,10 @@
 #include "dsi/iris/dsi_iris5_api.h"
 #endif
 
+#ifdef OPLUS_FEATURE_ADFR
+#include "oplus_adfr.h"
+#endif
+
 /*
  * MSM driver version:
  * - 1.0.0 - initial interface
@@ -372,6 +376,11 @@ static int msm_drm_uninit(struct device *dev)
 			priv->event_thread[i].thread = NULL;
 		}
 	}
+#ifdef OPLUS_FEATURE_ADFR
+	if (oplus_adfr_is_support()) {
+		oplus_adfr_thread_destroy(priv);
+	}
+#endif
 
 	drm_kms_helper_poll_fini(ddev);
 
@@ -643,6 +652,19 @@ static int msm_drm_display_thread_create(struct sched_param param,
 		priv->pp_event_thread = NULL;
 		return ret;
 	}
+
+#ifdef OPLUS_FEATURE_ADFR
+	/**
+	 * Use a seperate adfr thread for fake frame.
+	 * Because fake frame maybe causes crtc commit/event more heavy.
+	 * This can lead to commit miss TE/retire event delay
+	 */
+	if (oplus_adfr_is_support()) {
+		if (oplus_adfr_thread_create(&param, priv, ddev, dev)) {
+			return -EINVAL;
+		}
+	}
+#endif
 
 	return 0;
 
