@@ -148,3 +148,4 @@ Android.bp
 # Ignore toolchain and out
 toolchain/
 out/
+build.sh
