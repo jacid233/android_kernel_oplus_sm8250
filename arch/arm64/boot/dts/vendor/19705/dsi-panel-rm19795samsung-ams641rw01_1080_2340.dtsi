@@ -662,30 +662,6 @@
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 75 0>;
 	oplus,bl_interpolate_nosub;
-	oplus,dsi-brightness-remapping = <1    1>,
-                                    <2    7>,
-                                    <7    7>,
-                                    <50   10>,
-                                    <102  15>,
-                                    <204  25>,
-                                    <306  49>,
-                                    <409  102>,
-                                    <511  179>,
-                                    <613  282>,
-                                    <664  348>,
-                                    <716  415>,
-                                    <749  468>,
-                                    <783  523>,
-                                    <818  580>,
-                                    <843  629>,
-                                    <869  678>,
-                                    <895  730>,
-                                    <920  779>,
-                                    <946  841>,
-                                    <971  898>,
-                                    <997  958>,
-                                    <1023 1023>,
-                                    <2047 2047>;
 
 	//#ifdefine VENDOR_EDIT
 	//qcom,platform-panel-vout-gpio = <&tlmm 8 0>;
