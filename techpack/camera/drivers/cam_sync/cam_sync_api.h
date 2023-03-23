@@ -140,6 +140,8 @@ int cam_sync_destroy(int32_t sync_obj);
  */
 int cam_sync_wait(int32_t sync_obj, uint64_t timeout_ms);
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+/*wangjingkai@camera qcom case:04895864 Fix context release timing issue */
 /**
  * @brief: Check if sync object is valid
  *
@@ -149,5 +151,6 @@ int cam_sync_wait(int32_t sync_obj, uint64_t timeout_ms);
  * are invalid
  */
 int cam_sync_check_valid(int32_t sync_obj);
+#endif
 
 #endif /* __CAM_SYNC_API_H__ */

@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020, Oplus. All rights reserved.
  */
 
 #ifndef _CAM_HFI_REG_H_
@@ -39,8 +40,11 @@
 #define HFI_REG_QDSS_IOVA_SIZE                  0x70
 #define HFI_REG_IO_REGION_IOVA                  0x74
 #define HFI_REG_IO_REGION_SIZE                  0x78
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+//gongqiang.xiao@Camera add for case:04457772
 #define HFI_REG_IO2_REGION_IOVA                 0x7C
 #define HFI_REG_IO2_REGION_SIZE                 0x80
+#endif
 
 /* end of ICP CSR registers */
 

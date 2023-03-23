@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020, Oplus. All rights reserved.
  */
 
 #include <linux/of.h>
@@ -12,6 +13,10 @@
 
 #include "cam_ois_soc.h"
 #include "cam_debug_util.h"
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+#define OPLUS_FEATURE_CAMERA_COMMON
+#endif
+#include "oplus_cam_ois_soc.h"
 
 /**
  * @e_ctrl: ctrl structure
@@ -117,6 +122,8 @@ int cam_ois_driver_soc_init(struct cam_ois_ctrl_t *o_ctrl)
 	rc = cam_ois_get_dt_data(o_ctrl);
 	if (rc < 0)
 		CAM_DBG(CAM_OIS, "failed: ois get dt data rc %d", rc);
-
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	cam_ois_driver_soc_init_oem(o_ctrl,of_node);
+#endif
 	return rc;
 }

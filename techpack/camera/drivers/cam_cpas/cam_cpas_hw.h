@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020, Oplus. All rights reserved.
  */
 
 #ifndef _CAM_CPAS_HW_H_
@@ -165,7 +166,9 @@ struct cam_cpas_axi_port {
 	struct device_node *axi_port_node;
 	uint64_t ab_bw;
 	uint64_t ib_bw;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
 	uint64_t camnoc_bw;
+#endif
 	uint64_t additional_bw;
 	uint64_t applied_ab_bw;
 	uint64_t applied_ib_bw;
@@ -202,13 +205,17 @@ struct cam_cpas {
 	struct mutex tree_lock;
 	uint32_t num_clients;
 	uint32_t num_axi_ports;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
 	uint32_t num_camnoc_axi_ports;
+#endif
 	uint32_t registered_clients;
 	uint32_t streamon_clients;
 	int32_t regbase_index[CAM_CPAS_REG_MAX];
 	struct cam_cpas_bus_client ahb_bus_client;
 	struct cam_cpas_axi_port axi_port[CAM_CPAS_MAX_AXI_PORTS];
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
 	struct cam_cpas_axi_port camnoc_axi_port[CAM_CPAS_MAX_AXI_PORTS];
+#endif
 	struct cam_cpas_internal_ops internal_ops;
 	struct workqueue_struct *work_queue;
 	atomic_t irq_count;

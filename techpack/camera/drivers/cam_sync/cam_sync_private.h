@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
- * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
  */
 
 #ifndef __CAM_SYNC_PRIVATE_H__
@@ -24,8 +24,16 @@
 #endif
 
 #define CAM_SYNC_OBJ_NAME_LEN           64
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
 #define CAM_SYNC_MAX_OBJS               1024
+#else
+#define CAM_SYNC_MAX_OBJS               2048
+#endif
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+#define CAM_SYNC_MAX_V4L2_EVENTS        250
+#else
 #define CAM_SYNC_MAX_V4L2_EVENTS        100
+#endif
 #define CAM_SYNC_DEBUG_FILENAME         "cam_debug"
 #define CAM_SYNC_DEBUG_BASEDIR          "cam"
 #define CAM_SYNC_DEBUG_BUF_SIZE         32

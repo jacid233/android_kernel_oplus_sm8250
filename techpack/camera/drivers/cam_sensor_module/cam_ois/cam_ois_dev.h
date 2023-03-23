@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
- * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020, Oplus. All rights reserved.
  */
 #ifndef _CAM_OIS_DEV_H_
 #define _CAM_OIS_DEV_H_
@@ -24,6 +25,10 @@
 
 #define DEFINE_MSM_MUTEX(mutexname) \
 	static struct mutex mutexname = __MUTEX_INITIALIZER(mutexname)
+
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+#define OPLUS_FEATURE_CAMERA_COMMON
+#endif
 
 enum cam_ois_state {
 	CAM_OIS_INIT,
@@ -103,6 +108,7 @@ struct cam_ois_intf_params {
  * @device_name     :   Device name
  *
  */
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
 struct cam_ois_ctrl_t {
 	char device_name[CAM_CTX_DEV_NAME_MAX_LENGTH];
 	struct platform_device *pdev;
@@ -122,7 +128,8 @@ struct cam_ois_ctrl_t {
 	uint8_t ois_fw_flag;
 	uint8_t is_ois_calib;
 	struct cam_ois_opcode opcode;
-	uint32_t open_cnt;
 };
+#endif
+ #include "oplus_cam_ois_dev.h"
 
 #endif /*_CAM_OIS_DEV_H_ */

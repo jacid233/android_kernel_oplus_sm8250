@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020, Oplus. All rights reserved.
  */
 
 #include <linux/module.h>
@@ -14,15 +15,15 @@
 #include <linux/workqueue.h>
 #include <linux/genalloc.h>
 #include <linux/debugfs.h>
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+//gongqiang.xiao@Camera add for case:04457772
 #include <linux/dma-iommu.h>
-
+#endif
 #include <soc/qcom/scm.h>
 #include <soc/qcom/secure_buffer.h>
 #include <media/cam_req_mgr.h>
 #include "cam_smmu_api.h"
 #include "cam_debug_util.h"
-#include "cam_trace.h"
-#include "cam_common_util.h"
 
 #define SHARED_MEM_POOL_GRANULARITY 16
 
@@ -36,11 +37,6 @@
 
 #define GET_SMMU_HDL(x, y) (((x) << COOKIE_SIZE) | ((y) & COOKIE_MASK))
 #define GET_SMMU_TABLE_IDX(x) (((x) >> COOKIE_SIZE) & COOKIE_MASK)
-
-#define CAM_SMMU_MONITOR_MAX_ENTRIES   100
-#define CAM_SMMU_INC_MONITOR_HEAD(head, ret) \
-	div_u64_rem(atomic64_add_return(1, head),\
-	CAM_SMMU_MONITOR_MAX_ENTRIES, (ret))
 
 static int g_num_pf_handled = 4;
 module_param(g_num_pf_handled, int, 0644);
@@ -100,17 +96,6 @@ struct secheap_buf_info {
 	struct sg_table *table;
 };
 
-struct cam_smmu_monitor {
-	struct timespec64       timestamp;
-	bool                    is_map;
-
-	/* map-unmap info */
-	int                     ion_fd;
-	dma_addr_t              paddr;
-	size_t                  len;
-	enum cam_smmu_region_id region_id;
-};
-
 struct cam_context_bank_info {
 	struct device *dev;
 	struct iommu_domain *domain;
@@ -154,13 +139,12 @@ struct cam_context_bank_info {
 
 	size_t io_mapping_size;
 	size_t shared_mapping_size;
-
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	//gongqiang.xiao@Camera add for case:04457772
 	/* discard iova - non-zero values are valid */
 	dma_addr_t discard_iova_start;
 	size_t discard_iova_len;
-
-	atomic64_t  monitor_head;
-	struct cam_smmu_monitor monitor_entries[CAM_SMMU_MONITOR_MAX_ENTRIES];
+#endif
 };
 
 struct cam_iommu_cb_set {
@@ -173,7 +157,6 @@ struct cam_iommu_cb_set {
 	u32 non_fatal_fault;
 	struct dentry *dentry;
 	bool cb_dump_enable;
-	bool map_profile_enable;
 };
 
 static const struct of_device_id msm_cam_smmu_dt_match[] = {
@@ -245,10 +228,17 @@ static int cam_smmu_free_scratch_va(struct scratch_mapping *mapping,
 static struct cam_dma_buff_info *cam_smmu_find_mapping_by_virt_address(int idx,
 	dma_addr_t virt_addr);
 
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+//gongqiang.xiao@Camera add for case:04457772
 static int cam_smmu_map_buffer_and_add_to_list(int idx, int ion_fd,
-	bool dis_delayed_unmap, enum dma_data_direction dma_dir,
-	dma_addr_t *paddr_ptr, size_t *len_ptr,
-	enum cam_smmu_region_id region_id);
+	enum dma_data_direction dma_dir, dma_addr_t *paddr_ptr,
+	size_t *len_ptr, enum cam_smmu_region_id region_id);
+#else
+static int cam_smmu_map_buffer_and_add_to_list(int idx, int ion_fd,
+	bool dis_delayed_unmap,
+	enum dma_data_direction dma_dir, dma_addr_t *paddr_ptr,
+	size_t *len_ptr, enum cam_smmu_region_id region_id);
+#endif
 
 static int cam_smmu_map_kernel_buffer_and_add_to_list(int idx,
 	struct dma_buf *buf, enum dma_data_direction dma_dir,
@@ -283,76 +273,6 @@ static void cam_smmu_print_table(void);
 static int cam_smmu_probe(struct platform_device *pdev);
 
 static uint32_t cam_smmu_find_closest_mapping(int idx, void *vaddr);
-
-static void cam_smmu_update_monitor_array(
-	struct cam_context_bank_info *cb_info,
-	bool is_map,
-	struct cam_dma_buff_info *mapping_info)
-{
-	int iterator;
-
-	CAM_SMMU_INC_MONITOR_HEAD(&cb_info->monitor_head, &iterator);
-
-	ktime_get_real_ts64(&cb_info->monitor_entries[iterator].timestamp);
-
-	cb_info->monitor_entries[iterator].is_map = is_map;
-	cb_info->monitor_entries[iterator].ion_fd = mapping_info->ion_fd;
-	cb_info->monitor_entries[iterator].paddr = mapping_info->paddr;
-	cb_info->monitor_entries[iterator].len = mapping_info->len;
-	cb_info->monitor_entries[iterator].region_id = mapping_info->region_id;
-}
-
-static void cam_smmu_dump_monitor_array(
-	struct cam_context_bank_info *cb_info)
-{
-	int i = 0;
-	int64_t state_head = 0;
-	uint32_t index, num_entries, oldest_entry;
-	uint64_t ms, tmp, hrs, min, sec;
-	struct timespec64 *ts = NULL;
-
-	state_head = atomic64_read(&cb_info->monitor_head);
-
-	if (state_head == -1) {
-		return;
-	} else if (state_head < CAM_SMMU_MONITOR_MAX_ENTRIES) {
-		num_entries = state_head;
-		oldest_entry = 0;
-	} else {
-		num_entries = CAM_SMMU_MONITOR_MAX_ENTRIES;
-		div_u64_rem(state_head + 1,
-			CAM_SMMU_MONITOR_MAX_ENTRIES, &oldest_entry);
-	}
-
-	CAM_INFO(CAM_SMMU,
-		"========Dumping monitor information for cb %s===========",
-		cb_info->name);
-
-	index = oldest_entry;
-
-	for (i = 0; i < num_entries; i++) {
-		ts = &cb_info->monitor_entries[index].timestamp;
-		tmp = ts->tv_sec;
-		ms = (ts->tv_nsec) / 1000000;
-		sec = do_div(tmp, 60);
-		min = do_div(tmp, 60);
-		hrs = do_div(tmp, 24);
-
-		CAM_INFO(CAM_SMMU,
-		"**** %llu:%llu:%llu.%llu : Index[%d] [%s] : ion_fd=%d start=0x%x end=0x%x len=%u region=%d",
-		hrs, min, sec, ms,
-		index,
-		cb_info->monitor_entries[index].is_map ? "MAP" : "UNMAP",
-		cb_info->monitor_entries[index].ion_fd,
-		(void *)cb_info->monitor_entries[index].paddr,
-		((uint64_t)cb_info->monitor_entries[index].paddr +
-		(uint64_t)cb_info->monitor_entries[index].len),
-		(unsigned int)cb_info->monitor_entries[index].len,
-		cb_info->monitor_entries[index].region_id);
-
-		index = (index + 1) % CAM_SMMU_MONITOR_MAX_ENTRIES;
-	}
-}
 
 static void cam_smmu_page_fault_work(struct work_struct *work)
 {
@@ -391,7 +311,9 @@ static void cam_smmu_page_fault_work(struct work_struct *work)
 				buf_info);
 		}
 	}
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
 	cam_smmu_dump_cb_info(idx);
+#endif
 	kfree(payload);
 }
 
@@ -436,8 +358,6 @@ static void cam_smmu_dump_cb_info(int idx)
 				(unsigned int)mapping->len,
 				mapping->region_id);
 		}
-
-		cam_smmu_dump_monitor_array(&iommu_cb_set.cb_info[idx]);
 	}
 }
 
@@ -525,6 +445,7 @@ static uint32_t cam_smmu_find_closest_mapping(int idx, void *vaddr)
 end:
 	if (closest_mapping) {
 		buf_handle = GET_MEM_HANDLE(idx, closest_mapping->ion_fd);
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
 		CAM_INFO(CAM_SMMU,
 			"Closest map fd %d 0x%lx %llu-%llu 0x%lx-0x%lx buf=%pK mem %0x",
 			closest_mapping->ion_fd, current_addr,
@@ -533,6 +454,15 @@ end:
 			(unsigned long)closest_mapping->paddr + mapping->len,
 			closest_mapping->buf,
 			buf_handle);
+#else
+		CAM_INFO(CAM_SMMU,
+			"Closest map fd %d 0x%lx 0x%lx-0x%lx buf=%pK mem %0x",
+			closest_mapping->ion_fd, current_addr,
+			(unsigned long)closest_mapping->paddr,
+			(unsigned long)closest_mapping->paddr + mapping->len,
+			closest_mapping->buf,
+			buf_handle);
+#endif
 	} else
 		CAM_INFO(CAM_SMMU,
 			"Cannot find vaddr:%lx in SMMU %s virt address",
@@ -1521,13 +1451,21 @@ end:
 EXPORT_SYMBOL(cam_smmu_dealloc_qdss);
 
 int cam_smmu_get_io_region_info(int32_t smmu_hdl,
-	dma_addr_t *iova, size_t *len,
-	dma_addr_t *discard_iova_start, size_t *discard_iova_len)
+	dma_addr_t *iova, size_t *len
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	//gongqiang.xiao@Camera add for case:04457772
+	,dma_addr_t *discard_iova_start, size_t *discard_iova_len
+#endif
+)
 {
 	int32_t idx;
 
-	if (!iova || !len || !discard_iova_start || !discard_iova_len ||
-		(smmu_hdl == HANDLE_INIT)) {
+	if (!iova || !len ||
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+        //gongqiang.xiao@Camera add for case:04457772
+        !discard_iova_start || !discard_iova_len ||
+#endif
+        (smmu_hdl == HANDLE_INIT)) {
 		CAM_ERR(CAM_SMMU, "Error: Input args are invalid");
 		return -EINVAL;
 	}
@@ -1549,6 +1487,8 @@ int cam_smmu_get_io_region_info(int32_t smmu_hdl,
 	mutex_lock(&iommu_cb_set.cb_info[idx].lock);
 	*iova = iommu_cb_set.cb_info[idx].io_info.iova_start;
 	*len = iommu_cb_set.cb_info[idx].io_info.iova_len;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	//gongqiang.xiao@Camera add for case:04457772
 	*discard_iova_start =
 		iommu_cb_set.cb_info[idx].io_info.discard_iova_start;
 	*discard_iova_len =
@@ -1558,6 +1498,7 @@ int cam_smmu_get_io_region_info(int32_t smmu_hdl,
 		"I/O area for hdl = %x Region:[%pK %zu] Discard:[%pK %zu]",
 		smmu_hdl, *iova, *len,
 		*discard_iova_start, *discard_iova_len);
+#endif
 	mutex_unlock(&iommu_cb_set.cb_info[idx].lock);
 
 	return 0;
@@ -1798,10 +1739,19 @@ int cam_smmu_release_sec_heap(int32_t smmu_hdl)
 }
 EXPORT_SYMBOL(cam_smmu_release_sec_heap);
 
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+//gongqiang.xiao@Camera add for case:04457772
 static int cam_smmu_map_buffer_validate(struct dma_buf *buf,
 	int idx, enum dma_data_direction dma_dir, dma_addr_t *paddr_ptr,
 	size_t *len_ptr, enum cam_smmu_region_id region_id,
-	bool dis_delayed_unmap, struct cam_dma_buff_info **mapping_info)
+	struct cam_dma_buff_info **mapping_info)
+#else
+static int cam_smmu_map_buffer_validate(struct dma_buf *buf,
+	int idx, enum dma_data_direction dma_dir, dma_addr_t *paddr_ptr,
+	size_t *len_ptr, enum cam_smmu_region_id region_id,
+	bool dis_delayed_unmap,
+	struct cam_dma_buff_info **mapping_info)
+#endif
 {
 	struct dma_buf_attachment *attach = NULL;
 	struct sg_table *table = NULL;
@@ -1809,8 +1759,6 @@ static int cam_smmu_map_buffer_validate(struct dma_buf *buf,
 	size_t size = 0;
 	uint32_t iova = 0;
 	int rc = 0;
-	struct timespec64 ts1, ts2;
-	long microsec = 0;
 
 	if (IS_ERR_OR_NULL(buf)) {
 		rc = PTR_ERR(buf);
@@ -1824,9 +1772,6 @@ static int cam_smmu_map_buffer_validate(struct dma_buf *buf,
 		CAM_ERR(CAM_SMMU, "Error: mapping_info is invalid");
 		goto err_out;
 	}
-
-	if (iommu_cb_set.map_profile_enable)
-		CAM_GET_TIMESTAMP(ts1);
 
 	attach = dma_buf_attach(buf, iommu_cb_set.cb_info[idx].dev);
 	if (IS_ERR_OR_NULL(attach)) {
@@ -1881,15 +1826,17 @@ static int cam_smmu_map_buffer_validate(struct dma_buf *buf,
 		}
 		iommu_cb_set.cb_info[idx].shared_mapping_size += *len_ptr;
 	} else if (region_id == CAM_SMMU_REGION_IO) {
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+		attach->dma_map_attrs |= DMA_ATTR_DELAYED_UNMAP;
+#else
 		if (!dis_delayed_unmap)
 			attach->dma_map_attrs |= DMA_ATTR_DELAYED_UNMAP;
+#endif
 
 		table = dma_buf_map_attachment(attach, dma_dir);
 		if (IS_ERR_OR_NULL(table)) {
 			rc = PTR_ERR(table);
-			CAM_ERR(CAM_SMMU,
-				"Error: dma map attachment failed, size=%zu",
-				buf->size);
+			CAM_ERR(CAM_SMMU, "Error: dma map attachment failed");
 			goto err_detach;
 		}
 
@@ -1902,16 +1849,8 @@ static int cam_smmu_map_buffer_validate(struct dma_buf *buf,
 		goto err_unmap_sg;
 	}
 
-	CAM_DBG(CAM_SMMU,
-		"iova=%pK, region_id=%d, paddr=%pK, len=%d, dma_map_attrs=%d",
-		iova, region_id, *paddr_ptr, *len_ptr, attach->dma_map_attrs);
-
-	if (iommu_cb_set.map_profile_enable) {
-		CAM_GET_TIMESTAMP(ts2);
-		CAM_GET_TIMESTAMP_DIFF_IN_MICRO(ts1, ts2, microsec);
-		trace_cam_log_event("SMMUMapProfile", "size and time in micro",
-			*len_ptr, microsec);
-	}
+	CAM_DBG(CAM_SMMU, "iova=%pK, region_id=%d, paddr=%pK, len=%d",
+		iova, region_id, *paddr_ptr, *len_ptr);
 
 	if (table->sgl) {
 		CAM_DBG(CAM_SMMU,
@@ -1951,9 +1890,17 @@ static int cam_smmu_map_buffer_validate(struct dma_buf *buf,
 		rc = -ENOSPC;
 		goto err_alloc;
 	}
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+	//gongqiang.xiao@Camera add for case:0445777
 	CAM_DBG(CAM_SMMU, "idx=%d, dma_buf=%pK, dev=%pK, paddr=%pK, len=%u",
 		idx, buf, (void *)iommu_cb_set.cb_info[idx].dev,
 		(void *)*paddr_ptr, (unsigned int)*len_ptr);
+#else
+	CAM_DBG(CAM_SMMU, "idx=%d, dma_buf=%pK, dev=%pK, paddr=%pK, len=%u,dma_map_attrs=%d",
+		idx, buf, (void *)iommu_cb_set.cb_info[idx].dev,
+		(void *)*paddr_ptr, (unsigned int)*len_ptr, attach->dma_map_attrs);
+#endif
+
 
 	return 0;
 
@@ -1978,10 +1925,17 @@ err_out:
 }
 
 
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+//gongqiang.xiao@Camera add for case:04457772
 static int cam_smmu_map_buffer_and_add_to_list(int idx, int ion_fd,
-	bool dis_delayed_unmap, enum dma_data_direction dma_dir,
-	dma_addr_t *paddr_ptr, size_t *len_ptr,
-	enum cam_smmu_region_id region_id)
+	 enum dma_data_direction dma_dir, dma_addr_t *paddr_ptr,
+	 size_t *len_ptr, enum cam_smmu_region_id region_id)
+#else
+static int cam_smmu_map_buffer_and_add_to_list(int idx, int ion_fd,
+	 bool dis_delayed_unmap,
+	 enum dma_data_direction dma_dir, dma_addr_t *paddr_ptr,
+	 size_t *len_ptr, enum cam_smmu_region_id region_id)
+#endif
 {
 	int rc = -1;
 	struct cam_dma_buff_info *mapping_info = NULL;
@@ -1991,7 +1945,11 @@ static int cam_smmu_map_buffer_and_add_to_list(int idx, int ion_fd,
 	buf = dma_buf_get(ion_fd);
 
 	rc = cam_smmu_map_buffer_validate(buf, idx, dma_dir, paddr_ptr, len_ptr,
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+		region_id, &mapping_info);
+#else
 		region_id, dis_delayed_unmap, &mapping_info);
+#endif
 
 	if (rc) {
 		CAM_ERR(CAM_SMMU, "buffer validation failure");
@@ -2002,9 +1960,6 @@ static int cam_smmu_map_buffer_and_add_to_list(int idx, int ion_fd,
 	/* add to the list */
 	list_add(&mapping_info->list,
 		&iommu_cb_set.cb_info[idx].smmu_buf_list);
-
-	cam_smmu_update_monitor_array(&iommu_cb_set.cb_info[idx], true,
-		mapping_info);
 
 	return 0;
 }
@@ -2018,21 +1973,30 @@ static int cam_smmu_map_kernel_buffer_and_add_to_list(int idx,
 	struct cam_dma_buff_info *mapping_info = NULL;
 
 	rc = cam_smmu_map_buffer_validate(buf, idx, dma_dir, paddr_ptr, len_ptr,
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+		region_id, &mapping_info);
+#else
 		region_id, false, &mapping_info);
+#endif
 
 	if (rc) {
 		CAM_ERR(CAM_SMMU, "buffer validation failure");
 		return rc;
 	}
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	//gongqiang.xiao@Camera add for case:04457772
+	CAM_DBG(CAM_SMMU,
+		"region_id=%d, paddr=%pK, len=%d, dma_map_attrs=%d",
+		mapping_info->region_id, mapping_info->paddr, mapping_info->len,
+		mapping_info->attach->dma_map_attrs);
+#endif
+
 
 	mapping_info->ion_fd = -1;
 
 	/* add to the list */
 	list_add(&mapping_info->list,
 		&iommu_cb_set.cb_info[idx].smmu_buf_kernel_list);
-
-	cam_smmu_update_monitor_array(&iommu_cb_set.cb_info[idx], true,
-		mapping_info);
 
 	return 0;
 }
@@ -2045,8 +2009,6 @@ static int cam_smmu_unmap_buf_and_remove_from_list(
 	int rc;
 	size_t size;
 	struct iommu_domain *domain;
-	struct timespec64 ts1, ts2;
-	long microsec = 0;
 
 	if ((!mapping_info->buf) || (!mapping_info->table) ||
 		(!mapping_info->attach)) {
@@ -2059,17 +2021,6 @@ static int cam_smmu_unmap_buf_and_remove_from_list(
 			(void *)mapping_info->attach);
 		return -EINVAL;
 	}
-
-	cam_smmu_update_monitor_array(&iommu_cb_set.cb_info[idx], false,
-		mapping_info);
-
-	CAM_DBG(CAM_SMMU,
-		"region_id=%d, paddr=%pK, len=%d, dma_map_attrs=%d",
-		mapping_info->region_id, mapping_info->paddr, mapping_info->len,
-		mapping_info->attach->dma_map_attrs);
-
-	if (iommu_cb_set.map_profile_enable)
-		CAM_GET_TIMESTAMP(ts1);
 
 	if (mapping_info->region_id == CAM_SMMU_REGION_SHARED) {
 		CAM_DBG(CAM_SMMU,
@@ -2099,6 +2050,9 @@ static int cam_smmu_unmap_buf_and_remove_from_list(
 		iommu_cb_set.cb_info[idx].shared_mapping_size -=
 			mapping_info->len;
 	} else if (mapping_info->region_id == CAM_SMMU_REGION_IO) {
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+		mapping_info->attach->dma_map_attrs |= DMA_ATTR_DELAYED_UNMAP;
+#endif
 		iommu_cb_set.cb_info[idx].io_mapping_size -= mapping_info->len;
 	}
 
@@ -2106,13 +2060,6 @@ static int cam_smmu_unmap_buf_and_remove_from_list(
 		mapping_info->table, mapping_info->dir);
 	dma_buf_detach(mapping_info->buf, mapping_info->attach);
 	dma_buf_put(mapping_info->buf);
-
-	if (iommu_cb_set.map_profile_enable) {
-		CAM_GET_TIMESTAMP(ts2);
-		CAM_GET_TIMESTAMP_DIFF_IN_MICRO(ts1, ts2, microsec);
-		trace_cam_log_event("SMMUUnmapProfile",
-			"size and time in micro", mapping_info->len, microsec);
-	}
 
 	mapping_info->buf = NULL;
 
@@ -2858,9 +2805,17 @@ static int cam_smmu_map_iova_validate_params(int handle,
 	return rc;
 }
 
-int cam_smmu_map_user_iova(int handle, int ion_fd, bool dis_delayed_unmap,
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+//gongqiang.xiao@Camera add for case:04457772
+int cam_smmu_map_user_iova(int handle, int ion_fd,
 	enum cam_smmu_map_dir dir, dma_addr_t *paddr_ptr,
 	size_t *len_ptr, enum cam_smmu_region_id region_id)
+#else
+int cam_smmu_map_user_iova(int handle, int ion_fd,
+	bool dis_delayed_unmap,
+	enum cam_smmu_map_dir dir, dma_addr_t *paddr_ptr,
+	size_t *len_ptr, enum cam_smmu_region_id region_id)
+#endif
 {
 	int idx, rc = 0;
 	enum cam_smmu_buf_state buf_state;
@@ -2909,8 +2864,15 @@ int cam_smmu_map_user_iova(int handle, int ion_fd, bool dis_delayed_unmap,
 		goto get_addr_end;
 	}
 
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+	//gongqiang.xiao@Camera add for case:04457772
+	rc = cam_smmu_map_buffer_and_add_to_list(idx, ion_fd, dma_dir,
+			paddr_ptr, len_ptr, region_id);
+#else
 	rc = cam_smmu_map_buffer_and_add_to_list(idx, ion_fd,
-		dis_delayed_unmap, dma_dir, paddr_ptr, len_ptr, region_id);
+			dis_delayed_unmap, dma_dir, paddr_ptr, len_ptr, region_id);
+#endif
+
 	if (rc < 0) {
 		CAM_ERR(CAM_SMMU,
 			"mapping or add list fail, idx=%d, fd=%d, region=%d, rc=%d",
@@ -3031,7 +2993,6 @@ int cam_smmu_get_iova(int handle, int ion_fd,
 	if (buf_state == CAM_SMMU_BUFF_NOT_EXIST) {
 		CAM_ERR(CAM_SMMU, "ion_fd:%d not in the mapped list", ion_fd);
 		rc = -EINVAL;
-		cam_smmu_dump_cb_info(idx);
 		goto get_addr_end;
 	}
 
@@ -3377,8 +3338,6 @@ static int cam_smmu_setup_cb(struct cam_context_bank_info *cb,
 	cb->is_fw_allocated = false;
 	cb->is_secheap_allocated = false;
 
-	atomic64_set(&cb->monitor_head, -1);
-
 	/* Create a pool with 64K granularity for supporting shared memory */
 	if (cb->shared_support) {
 		cb->shared_mem_pool = gen_pool_create(
@@ -3426,13 +3385,13 @@ static int cam_smmu_setup_cb(struct cam_context_bank_info *cb,
 			rc = -ENODEV;
 			goto end;
 		}
-
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+		//gongqiang.xiao@Camera add for case:04457772
 		iommu_dma_enable_best_fit_algo(dev);
-
 		if (cb->discard_iova_start)
 			iommu_dma_reserve_iova(dev, cb->discard_iova_start,
 				cb->discard_iova_len);
-
+#endif
 		cb->state = CAM_SMMU_ATTACH;
 	} else {
 		CAM_ERR(CAM_SMMU, "Context bank does not have IO region");
@@ -3499,6 +3458,8 @@ static int cam_alloc_smmu_context_banks(struct device *dev)
 	return 0;
 }
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+//gongqiang.xiao@Camera add for case:04457772
 static int cam_smmu_get_discard_memory_regions(struct device_node *of_node,
 	dma_addr_t *discard_iova_start, size_t *discard_iova_len)
 {
@@ -3544,6 +3505,8 @@ static int cam_smmu_get_discard_memory_regions(struct device_node *of_node,
 
 	return 0;
 }
+#endif
+
 
 static int cam_smmu_get_memory_regions_info(struct device_node *of_node,
 	struct cam_context_bank_info *cb)
@@ -3643,6 +3606,8 @@ static int cam_smmu_get_memory_regions_info(struct device_node *of_node,
 			cb->io_support = 1;
 			cb->io_info.iova_start = region_start;
 			cb->io_info.iova_len = region_len;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+			//gongqiang.xiao@Camera add for case:04457772
 			rc = cam_smmu_get_discard_memory_regions(child_node,
 				&cb->io_info.discard_iova_start,
 				&cb->io_info.discard_iova_len);
@@ -3653,6 +3618,7 @@ static int cam_smmu_get_memory_regions_info(struct device_node *of_node,
 				of_node_put(mem_map_node);
 				return -EINVAL;
 			}
+#endif
 			break;
 		case CAM_SMMU_REGION_SECHEAP:
 			cb->secheap_support = 1;
@@ -3677,11 +3643,12 @@ static int cam_smmu_get_memory_regions_info(struct device_node *of_node,
 		CAM_DBG(CAM_SMMU, "region_len -> %X", region_len);
 		CAM_DBG(CAM_SMMU, "region_id -> %X", region_id);
 	}
-
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	//gongqiang.xiao@Camera add for case:04457772
 	if (cb->io_support) {
 		rc = cam_smmu_get_discard_memory_regions(of_node,
-			&cb->discard_iova_start,
-			&cb->discard_iova_len);
+				&cb->discard_iova_start,
+				&cb->discard_iova_len);
 		if (rc) {
 			CAM_ERR(CAM_SMMU,
 				"Invalid Discard region specified in CB, rc=%d",
@@ -3730,6 +3697,7 @@ static int cam_smmu_get_memory_regions_info(struct device_node *of_node,
 				cb->io_info.iova_start + cb->io_info.iova_len);
 		}
 	}
+#endif
 
 	of_node_put(mem_map_node);
 
@@ -3845,15 +3813,6 @@ static int cam_smmu_create_debug_fs(void)
 		&iommu_cb_set.cb_dump_enable)) {
 		CAM_ERR(CAM_SMMU,
 			"failed to create dump_enable_debug");
-		goto err;
-	}
-
-	if (!debugfs_create_bool("map_profile_enable",
-		0644,
-		iommu_cb_set.dentry,
-		&iommu_cb_set.map_profile_enable)) {
-		CAM_ERR(CAM_SMMU,
-			"failed to create map_profile_enable");
 		goto err;
 	}
 

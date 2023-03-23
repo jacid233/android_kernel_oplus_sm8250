@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
- * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020, Oplus. All rights reserved.
  */
 
 #ifndef _CAM_IFE_CSID_HW_H_
@@ -39,6 +40,7 @@
 #define CSID_CSI2_RX_INFO_TG_DONE                 BIT(25)
 #define CSID_CSI2_RX_ERROR_TG_FIFO_OVERFLOW       BIT(26)
 #define CSID_CSI2_RX_INFO_RST_DONE                BIT(27)
+
 
 #define CSID_TOP_IRQ_DONE                         BIT(0)
 #define CSID_PATH_INFO_RST_DONE                   BIT(1)
@@ -159,8 +161,6 @@ struct cam_ife_csid_pxl_reg_offset {
 	uint32_t quad_cfa_bin_en_shift_val;
 	uint32_t ccif_violation_en;
 	uint32_t overflow_ctrl_en;
-	uint32_t halt_master_sel_en;
-	uint32_t halt_sel_internal_master_val;
 };
 
 struct cam_ife_csid_rdi_reg_offset {
@@ -393,10 +393,6 @@ struct cam_ife_csid_common_reg_offset {
 	uint32_t measure_en_hbi_vbi_cnt_mask;
 	uint32_t format_measure_en_val;
 	uint32_t num_bytes_out_shift_val;
-	uint32_t format_measure_width_shift_val;
-	uint32_t format_measure_width_mask_val;
-	uint32_t format_measure_height_shift_val;
-	uint32_t format_measure_height_mask_val;
 };
 
 /**
@@ -478,7 +474,6 @@ struct cam_ife_csid_tpg_cfg  {
  * @cnt:              Cid resource reference count.
  * @tpg_set:          Tpg used for this cid resource
  * @is_valid_vc1_dt1: Valid vc1 and dt1
- * @init_cnt          cid resource init count
  *
  */
 struct cam_ife_csid_cid_data {
@@ -489,7 +484,6 @@ struct cam_ife_csid_cid_data {
 	uint32_t                     cnt;
 	uint32_t                     tpg_set;
 	uint32_t                     is_valid_vc1_dt1;
-	uint32_t                     init_cnt;
 };
 
 
@@ -514,13 +508,10 @@ struct cam_ife_csid_cid_data {
  *                  Reserving the path for master IPP or slave IPP
  *                  master (set value 1), Slave ( set value 2)
  *                  for RDI, set  mode to none
- * @usage_type:     dual or single IFE information
  * @master_idx:     For Slave reservation, Give master IFE instance Index.
  *                  Slave will synchronize with master Start and stop operations
  * @clk_rate        Clock rate
  * @num_bytes_out:  Number of output bytes per cycle
- * @init_frame_drop init frame drop value. In dual ife case rdi need to drop one
- *                  more frame than pix.
  *
  */
 struct cam_ife_csid_path_cfg {
@@ -541,13 +532,11 @@ struct cam_ife_csid_path_cfg {
 	uint32_t                        end_line;
 	uint32_t                        height;
 	enum cam_isp_hw_sync_mode       sync_mode;
-	uint32_t                        usage_type;
 	uint32_t                        master_idx;
 	uint64_t                        clk_rate;
 	uint32_t                        horizontal_bin;
 	uint32_t                        qcfa_bin;
 	uint32_t                        num_bytes_out;
-	uint32_t                        init_frame_drop;
 };
 
 /**
@@ -598,22 +587,16 @@ struct cam_csid_evt_payload {
  * @clk_rate                  Clock rate
  * @sof_irq_triggered:        Flag is set on receiving event to enable sof irq
  *                            incase of SOF freeze.
- * @is_resetting:             informs whether reset is started or not.
  * @irq_debug_cnt:            Counter to track sof irq's when above flag is set.
  * @error_irq_count           Error IRQ count, if continuous error irq comes
  *                            need to stop the CSID and mask interrupts.
- * @device_enabled            Device enabled will set once CSID powered on and
- *                            initial configuration are done.
- * @lock_state                csid spin lock
  * @binning_enable            Flag is set if hardware supports QCFA binning
  * @binning_supported         Flag is set if sensor supports QCFA binning
+ *
  * @first_sof_ts              first bootime stamp at the start
  * @prev_qtimer_ts            stores csid timestamp
- * @epd_supported             Flag is set if sensor supports EPD
  * @fatal_err_detected        flag to indicate fatal errror is reported
  * @event_cb                  Callback to hw manager if CSID event reported
- * @res_sof_cnt               path resource sof count value. it used for initial
- *                            frame drop
  */
 struct cam_ife_csid_hw {
 	struct cam_hw_intf              *hw_intf;
@@ -642,13 +625,10 @@ struct cam_ife_csid_hw {
 	struct completion    csid_udin_complete[CAM_IFE_CSID_UDI_MAX];
 	uint64_t                         csid_debug;
 	uint64_t                         clk_rate;
-	struct cam_isp_sensor_dimension  ipp_path_config;
-	struct cam_isp_sensor_dimension  ppp_path_config;
-	struct cam_isp_sensor_dimension  rdi_path_config[CAM_IFE_CSID_RDI_MAX];
-	uint32_t                         hbi;
-	uint32_t                         vbi;
 	bool                             sof_irq_triggered;
-	bool                             is_resetting;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	bool                             is_reseting;
+#endif
 	uint32_t                         irq_debug_cnt;
 	uint32_t                         error_irq_count;
 	uint32_t                         device_enabled;
@@ -657,10 +637,8 @@ struct cam_ife_csid_hw {
 	uint32_t                         binning_supported;
 	uint64_t                         prev_boot_timestamp;
 	uint64_t                         prev_qtimer_ts;
-	uint32_t                         epd_supported;
 	bool                             fatal_err_detected;
 	cam_hw_mgr_event_cb_func         event_cb;
-	uint32_t                         res_sof_cnt[CAM_IFE_PIX_PATH_RES_MAX];
 };
 
 int cam_ife_csid_hw_probe_init(struct cam_hw_intf  *csid_hw_intf,

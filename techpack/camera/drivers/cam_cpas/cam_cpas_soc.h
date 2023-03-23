@@ -54,7 +54,9 @@ struct cam_cpas_tree_node {
 	uint32_t cell_idx;
 	uint32_t level_idx;
 	int axi_port_idx;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
 	int camnoc_axi_port_idx;
+#endif
 	const char *node_name;
 	uint32_t path_data_type;
 	uint32_t path_trans_type;

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020, Oplus. All rights reserved.
  */
 
 #include <linux/of.h>
@@ -55,6 +56,16 @@ int32_t cam_actuator_parse_dt(struct cam_actuator_ctrl_t *a_ctrl,
 		a_ctrl->io_master_info.cci_client->cci_device = a_ctrl->cci_num;
 		CAM_DBG(CAM_ACTUATOR, "cci-device %d", a_ctrl->cci_num);
 	}
+
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	if (!of_property_read_bool(of_node, "need-check-data")) {
+		CAM_DBG(CAM_ACTUATOR, "No need-check-data defined");
+		a_ctrl->need_check_actuator_data = false;
+	} else {
+		a_ctrl->is_actuator_pid_updated = false;
+		a_ctrl->need_check_actuator_data = true;
+	}
+#endif
 
 	if (!soc_info->gpio_data) {
 		CAM_INFO(CAM_ACTUATOR, "No GPIO found");

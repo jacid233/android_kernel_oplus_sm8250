@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020, Oplus. All rights reserved.
  */
 
 #ifndef _CAM_SENSOR_I2C_H_
@@ -18,7 +19,11 @@
 #define I2C_COMPARE_MATCH 0
 #define I2C_COMPARE_MISMATCH 1
 
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
 #define I2C_REG_DATA_MAX       (8*1024)
+#else
+#define I2C_REG_DATA_MAX       (16*1024)
+#endif
 
 /**
  * @client: CCI client structure
