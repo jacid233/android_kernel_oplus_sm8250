@@ -95,3 +95,4 @@ obj-$(CONFIG_OEM_QMI)	+= oem_qmi_client.o
 #endif
 obj-$(CONFIG_FPR_FPC)		+= fpr_FingerprintCard/
 obj-y                           += qrc/
+obj-$(CONFIG_KINECTICS_XR_NORDIC) += kxrctrl/
