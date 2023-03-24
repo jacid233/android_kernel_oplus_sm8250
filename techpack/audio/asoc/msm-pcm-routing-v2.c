@@ -1668,7 +1668,7 @@ static int msm_pcm_routing_channel_mixer_v2(int fe_id, bool perf_mode,
 	be_id = channel_mixer_v2[fe_id][sess_type].port_idx - 1;
 	if (be_id < 0 || be_id >= MSM_BACKEND_DAI_MAX) {
 		pr_err("%s: Received out of bounds be_id %d\n",
-			__func__, be_id);
+				__func__, be_id);
 		return -EINVAL;
 	}
 	channel_mixer_v2[fe_id][sess_type].input_channels[0] =
