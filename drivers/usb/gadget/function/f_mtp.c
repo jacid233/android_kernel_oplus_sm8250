@@ -1050,7 +1050,7 @@ static int mtp_send_event(struct mtp_dev *dev, struct mtp_event *event)
 			(req = mtp_req_get(dev, &dev->intr_idle)),
 			msecs_to_jiffies(1000));
 #else
-	ret = mtp_req_get(dev, &dev->intr_idle);
+	req = mtp_req_get(dev, &dev->intr_idle);
 #endif
 	if (!req)
 #ifndef OPLUS_FEATURE_CHG_BASIC
@@ -1180,6 +1180,7 @@ int mtp_unregister_notifier(struct notifier_block *nb)
 }
 EXPORT_SYMBOL(mtp_unregister_notifier);
 #endif /*OPLUS_FEATURE_CHG_BASIC*/
+
 
 static long mtp_ioctl(struct file *fp, unsigned int code, unsigned long value)
 {
