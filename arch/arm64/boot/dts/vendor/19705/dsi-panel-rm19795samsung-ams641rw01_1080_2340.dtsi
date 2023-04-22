@@ -666,7 +666,7 @@
 	//#ifdefine VENDOR_EDIT
 	//qcom,platform-panel-vout-gpio = <&tlmm 8 0>;
 	//#endif /*VENDOR_EDIT*/
-	//qcom,ulps-enabled;
+	qcom,ulps-enabled;
 	qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0";
 
 	qcom,mdss-dsi-display-timings {
