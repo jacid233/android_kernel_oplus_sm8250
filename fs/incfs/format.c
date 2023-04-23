@@ -94,7 +94,7 @@ static int truncate_backing_file(struct backing_file_context *bfc,
 static int write_to_bf(struct backing_file_context *bfc, const void *buf,
 			size_t count, loff_t pos)
 {
-	ssize_t res = incfs_kwrite(bfc->bc_file, buf, count, pos);
+	ssize_t res = incfs_kwrite(bfc, buf, count, pos);
 
 	if (res < 0)
 		return res;
@@ -376,13 +376,13 @@ int incfs_write_status_to_backing_file(struct backing_file_context *bfc,
 		return write_new_status_to_backing_file(bfc,
 				data_blocks_written, hash_blocks_written);
 
-	result = incfs_kread(bfc->bc_file, &is, sizeof(is), status_offset);
+	result = incfs_kread(bfc, &is, sizeof(is), status_offset);
 	if (result != sizeof(is))
 		return -EIO;
 
 	is.is_data_blocks_written = cpu_to_le32(data_blocks_written);
 	is.is_hash_blocks_written = cpu_to_le32(hash_blocks_written);
-	result = incfs_kwrite(bfc->bc_file, &is, sizeof(is), status_offset);
+	result = incfs_kwrite(bfc, &is, sizeof(is), status_offset);
 	if (result != sizeof(is))
 		return -EIO;
 
@@ -585,11 +585,7 @@ int incfs_read_file_header(struct backing_file_context *bfc,
 	if (!bfc || !first_md_off)
 		return -EFAULT;
 
-<<<<<<< HEAD
 	bytes_read = incfs_kread(bfc, &fh, sizeof(fh), 0);
-=======
-	bytes_read = incfs_kread(bfc->bc_file, &fh, sizeof(fh), 0);
->>>>>>> ASB-2020-12-05_4.19-stable
 	if (bytes_read < 0)
 		return bytes_read;
 
