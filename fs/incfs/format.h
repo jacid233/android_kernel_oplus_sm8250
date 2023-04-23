@@ -343,7 +343,9 @@ int incfs_read_blockmap_entries(struct backing_file_context *bfc,
 int incfs_read_next_metadata_record(struct backing_file_context *bfc,
 				    struct metadata_handler *handler);
 
-ssize_t incfs_kread(struct file *f, void *buf, size_t size, loff_t pos);
-ssize_t incfs_kwrite(struct file *f, const void *buf, size_t size, loff_t pos);
+ssize_t incfs_kread(struct backing_file_context *bfc, void *buf, size_t size,
+		    loff_t pos);
+ssize_t incfs_kwrite(struct backing_file_context *bfc, const void *buf,
+		     size_t size, loff_t pos);
 
 #endif /* _INCFS_FORMAT_H */
