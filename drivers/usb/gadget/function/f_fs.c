@@ -1830,15 +1830,11 @@ static void ffs_data_closed(struct ffs_data *ffs)
 	if (atomic_dec_and_test(&ffs->opened)) {
 		if (ffs->no_disconnect) {
 			ffs->state = FFS_DEACTIVATED;
-			mutex_lock(&ffs->mutex);
 			if (ffs->epfiles) {
 				ffs_epfiles_destroy(ffs->epfiles,
 						   ffs->eps_count);
 				ffs->epfiles = NULL;
 			}
-			mutex_unlock(&ffs->mutex);
-			if (ffs->setup_state == FFS_SETUP_PENDING)
-				__ffs_ep0_stall(ffs);
 		} else {
 			ffs->state = FFS_CLOSING;
 			ffs_data_reset(ffs);
@@ -2077,19 +2073,16 @@ static void ffs_epfiles_destroy(struct ffs_epfile *epfiles, unsigned count)
 
 static void ffs_func_eps_disable(struct ffs_function *func)
 {
+	struct ffs_ep *ep         = func->eps;
 	struct ffs_data *ffs      = func->ffs;
-	struct ffs_ep *ep;
-	struct ffs_epfile *epfile;
-	unsigned short count;
+	struct ffs_epfile *epfile = func->ffs->epfiles;
+	unsigned count            = func->ffs->eps_count;
 	unsigned long flags;
 
 	ffs_log("enter: state %d setup_state %d flag %lu", func->ffs->state,
 		func->ffs->setup_state, func->ffs->flags);
 
 	spin_lock_irqsave(&func->ffs->eps_lock, flags);
-	count = func->ffs->eps_count;
-	epfile = func->ffs->epfiles;
-	ep = func->eps;
 	while (count--) {
 		/* pending requests get nuked */
 		if (likely(ep->ep))
