@@ -137,3 +137,7 @@ all.config
 kernel/configs/android-*.cfg
 
 # ln the wakelock_profiler
+
+# Local builds
+build.sh
+/out
