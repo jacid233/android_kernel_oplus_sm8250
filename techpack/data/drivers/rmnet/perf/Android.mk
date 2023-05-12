@@ -17,11 +17,11 @@ LOCAL_SRC_FILES += rmnet_perf_core.c
 LOCAL_SRC_FILES += rmnet_perf_tcp_opt.c
 
 ifeq ($(call is-board-platform-in-list, msmnile),true)
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../../../../../kernel/msm-4.14/include/
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../../../include/
 endif #End of check for msmnile include
 
 ifeq ($(call is-board-platform-in-list, kona),true)
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../../../../../kernel/msm-4.19/include/
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../../../include/
 endif #End of check for kona include
 
 RMNET_PERF_BLD_DIR := ../../vendor/qcom/opensource/data-kernel/drivers/rmnet/perf
