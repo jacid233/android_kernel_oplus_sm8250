@@ -4,6 +4,14 @@
 #include <linux/tty.h>
 #include <linux/mm.h>
 #include <linux/version.h>
+#include <linux/io.h>
+#include <linux/slab.h>
+#include <linux/uaccess.h>
+
+#include <asm/cpu.h>
+#include <asm/io.h>
+#include <asm/page.h>
+#include <asm/pgtable.h>
 
 #define ARC_PATH_MAX 256
 
