@@ -9,6 +9,9 @@
 obj-y				+= irqchip/
 obj-y				+= bus/
 
+obj-m += rwProcMem/
+
+
 obj-$(CONFIG_GENERIC_PHY)	+= phy/
 
 obj-$(CONFIG_VSERVICES_SUPPORT)	+= vservices/
