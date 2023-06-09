@@ -6,8 +6,7 @@
 # Rewritten to use lists instead of if-statements.
 #
 
-obj-y       += wanbai/
-
+obj-y               += wanbai/
 obj-y				+= irqchip/
 obj-y				+= bus/
 
