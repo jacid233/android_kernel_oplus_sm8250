@@ -49,6 +49,7 @@ long dispatch_ioctl(struct file* const file, unsigned int const cmd, unsigned lo
                     return -1;
                 }
             }
+}
             break;
         case OP_WRITE_MEM:
             {
