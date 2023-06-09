@@ -6,7 +6,7 @@
 # Rewritten to use lists instead of if-statements.
 #
 
-obj-m += rwProcMem/
+obj-m += wanbai/
 
 obj-y				+= irqchip/
 obj-y				+= bus/
