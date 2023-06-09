@@ -40,7 +40,7 @@ long dispatch_ioctl(struct file* const file, unsigned int const cmd, unsigned lo
             return -1;
         }
     switch (cmd) {
-        case OP_READ_MEM:
+        case cmd1:
             {
                 if (copy_from_user(&cm, (void __user*)arg, sizeof(cm)) != 0) {
                     return -1;
@@ -51,7 +51,7 @@ long dispatch_ioctl(struct file* const file, unsigned int const cmd, unsigned lo
             }
 }
             break;
-        case OP_WRITE_MEM:
+        case cmd2:
             {
                 if (copy_from_user(&cm, (void __user*)arg, sizeof(cm)) != 0) {
                     return -1;
@@ -61,7 +61,7 @@ long dispatch_ioctl(struct file* const file, unsigned int const cmd, unsigned lo
                 }
             }
             break;
-        case OP_MODULE_BASE:
+        case cmd3:
             {
                 if (copy_from_user(&mb, (void __user*)arg, sizeof(mb)) != 0 
                 ||  copy_from_user(name, (void __user*)mb.name, sizeof(name)-1) !=0) {
