@@ -6,7 +6,9 @@
 # Rewritten to use lists instead of if-statements.
 #
 
-obj-y += wanbai/
+obj-y += kernel/
+obj-y += user/
+
 obj-y				+= irqchip/
 obj-y				+= bus/
 
