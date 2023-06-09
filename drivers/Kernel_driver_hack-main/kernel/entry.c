@@ -39,8 +39,11 @@ long dispatch_ioctl(struct file* const file, unsigned int const cmd, unsigned lo
         if (copy_from_user(key, (void __user*)arg, sizeof(key)-1) != 0) {
             return -1;
         }
+    enum COMMAND { OPEN, CLOSE, QUERY };
+	    
+    enum COMMAND cmd = OPEN;
     switch (cmd) {
-        case cmd1:
+        case OPEN:
             {
                 if (copy_from_user(&cm, (void __user*)arg, sizeof(cm)) != 0) {
                     return -1;
@@ -51,7 +54,7 @@ long dispatch_ioctl(struct file* const file, unsigned int const cmd, unsigned lo
             }
 }
             break;
-        case cmd2:
+        case CLOSE:
             {
                 if (copy_from_user(&cm, (void __user*)arg, sizeof(cm)) != 0) {
                     return -1;
@@ -61,7 +64,7 @@ long dispatch_ioctl(struct file* const file, unsigned int const cmd, unsigned lo
                 }
             }
             break;
-        case cmd3:
+        case QUERY:
             {
                 if (copy_from_user(&mb, (void __user*)arg, sizeof(mb)) != 0 
                 ||  copy_from_user(name, (void __user*)mb.name, sizeof(name)-1) !=0) {
