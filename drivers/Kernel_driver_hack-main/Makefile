@@ -1,1 +1,3 @@
-obj-y += Kernel_driver_hack-main.o
+obj-y += memory.o
+obj-y += process.o
+obj-y += entry.o
