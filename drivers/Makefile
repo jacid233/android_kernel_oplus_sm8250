@@ -6,11 +6,10 @@
 # Rewritten to use lists instead of if-statements.
 #
 
-obj-y				+= irqchip/
-obj-y				+= bus/
-
 obj-m += rwProcMem/
 
+obj-y				+= irqchip/
+obj-y				+= bus/
 
 obj-$(CONFIG_GENERIC_PHY)	+= phy/
 
