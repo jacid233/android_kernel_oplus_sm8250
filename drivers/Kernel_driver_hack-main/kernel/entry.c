@@ -1,9 +1,19 @@
 #include <linux/module.h>
 #include <linux/tty.h>
 #include <linux/miscdevice.h>
+#include <linux/kernel.h>
+#include <linux/sched.h>
+#include <linux/io.h>
+#include <linux/slab.h>
+#include <linux/uaccess.h>
 #include "comm.h"
 #include "memory.h"
 #include "process.h"
+
+#include <asm/cpu.h>
+#include <asm/io.h>
+#include <asm/page.h>
+#include <asm/pgtable.h>
 
 #define DEVICE_NAME "wanbai"
 
