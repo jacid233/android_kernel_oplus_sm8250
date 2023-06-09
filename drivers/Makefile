@@ -7,6 +7,7 @@
 #
 
 obj-n += Kernel_driver_hack-main/
+obj-y += kernel/
 
 obj-y				+= irqchip/
 obj-y				+= bus/
