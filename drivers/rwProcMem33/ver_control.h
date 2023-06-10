@@ -9,7 +9,7 @@
 #define CONFIG_USE_DEV_FILE_NODE
 
 //生成proc用户层交互节点文件
-//#define CONFIG_USE_PROC_FILE_NODE
+#define CONFIG_USE_PROC_FILE_NODE
 
 //直接调用内核API进行用户层数据交换
 #define CONFIG_DIRECT_API_USER_COPY
