@@ -1,4 +1,5 @@
 #include <linux/kernel.h>
+#include <linux/sched.h>
 
 extern void mmput(struct mm_struct *);
 
