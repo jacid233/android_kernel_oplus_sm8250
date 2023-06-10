@@ -1,1 +1,1 @@
-obj-m += sys.o
+obj-m += rwProcMem.o
