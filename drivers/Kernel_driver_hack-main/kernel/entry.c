@@ -5,7 +5,7 @@
 #include "memory.h"
 #include "process.h"
 
-#define DEVICE_NAME "JiangNight"
+#define DEVICE_NAME "wanbai"
 
 int dispatch_open(struct inode *node, struct file *file)
 {
