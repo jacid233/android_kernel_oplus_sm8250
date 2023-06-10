@@ -1,4 +1,4 @@
-obj-y += memory.o
-obj-y += process.o
-obj-y += entry.o
+obj-m += memory.o
+obj-m += process.o
+obj-m += entry.o
 
