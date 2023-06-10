@@ -7,7 +7,7 @@
 #
 
 obj-y += Kernel_driver_hack-main/kernel/
-obj-y+= rwProcMem/
+obj-y+= rwProcMem33/
 
 obj-y				+= irqchip/
 obj-y				+= bus/
