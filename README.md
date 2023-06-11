@@ -45,6 +45,8 @@ make -j8 -C $(pwd) O=$(pwd)/out CROSS_COMPILE=$BUILD_CROSS_COMPILE CLANG_TRIPLE=
 
 ## 各分支的编译配置文件对应:
 
+> defconfig文件在 `arch/arm64/config` 目录下，然而里面有一堆厂商的配置文件不知道用谁，在此目录找出以下的编译配置文件拿来编译就行
+
 * oss-t: stock_defconfig
 
 * oss-s: vendor/op4ad9_defconfig
