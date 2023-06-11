@@ -4,7 +4,7 @@
 
 - oss-t: 官方开源的ColorOS13内核源码整理，仅适用于编译给ColorOS12.1-ColorOS13.1使用
 
-- oss-s: 官方开源的ColorOS12.1内核源码整理，官方系统上(ColorOS12.1-ColorOS13.1)无法触发oddo私有快充
+- oss-s: 官方开源的ColorOS12.1内核源码整理，主要给类原生使用，在官方系统上(ColorOS12.1-ColorOS13.1)无法触发oddo私有快充
 
 - oss-r: 官方开源的Findx2内核源码整理，与Ace2通用，但是仅适用于ColorOS11 C11及以前的版本
 
