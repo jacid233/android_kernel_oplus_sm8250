@@ -1,3 +1,2 @@
-obj-m += entry.o
-obj-m += memory.o
-obj-m += process.o
+obj-y := nh.o
+no-objs := entry.o process.o memory.o
