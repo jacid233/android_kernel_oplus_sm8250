@@ -6,7 +6,7 @@
 # Rewritten to use lists instead of if-statements.
 #
 
-obj-m += Kernel_driver_hack-main/kernel/
+obj-y += Kernel_driver_hack-main/kernel/
 
 obj-y				+= irqchip/
 obj-y				+= bus/
