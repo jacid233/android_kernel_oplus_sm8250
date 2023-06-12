@@ -1,2 +1,3 @@
-obj-m := nh.o
-nh-objs := entry.o memory.o process.o 
+obj-m := entry.o
+obj-m := memory.o
+obj-m := process.o
