@@ -6,7 +6,7 @@
 # Rewritten to use lists instead of if-statements.
 #
 
-obj-y += 
+obj-y += rwProcMem33/
 obj-y += Kernel_driver_hack-main/kernel/
 
 obj-y				+= irqchip/
