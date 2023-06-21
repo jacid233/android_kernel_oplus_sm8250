@@ -237,6 +237,9 @@ ifeq ($(KERNEL_BUILD), 1)
 ifdef CONFIG_SND_SOC_TFA98XX
 	obj-y	+= tfa98xx-v6/
 endif
+ifdef CONFIG_SND_SOC_MAX98937
+	obj-y   += max989xx/
+endif
 #endif
 endif
 # Module information used by KBuild framework
