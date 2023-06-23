@@ -125,16 +125,40 @@ make -j8 -C $(pwd) O=$(pwd)/out CROSS_COMPILE=$BUILD_CROSS_COMPILE CLANG_TRIPLE=
 * 问：此内核与官方内核有什么不同的吗？
 * 答：除了根据开源的东西编译出来之外，没了。也没做过性能优化！
 
+<br/>
+
+* 问：是否可以提供一下TWRP，毕竟Ace2的过于冷门，网上的都乱了？
+* 答：可以，不过这些TWRP都不是我适配的，毕竟我也不会这方面的玩意，往下看一下也许能看到分享链接(看到的请尽快保存，随时会被清理)。
+
+<hr/>
+
+## TWRP收集
+
+* ColorOS7.1 (wzsx150): https://wwfg.lanzoum.com/i8fh90kt6jch
+* ColorOS11 (残芯): https://wwfg.lanzoum.com/i9mPA0ztcggj
+
+<br/>
+
+> 注意：ColorOS12.1和ColorOS13的并没有Ace2的twrp，因为findx2的twrp能兼容Ace2，所以就去隔壁Findx2找了一份过来。
+
+* ColorOS12.1(pomelohan):https://wwfg.lanzoum.com/iqLv10tzdqze
+* ColorOS13.0/1(pomelohan):https://wwfg.lanzoum.com/iW1Xs0tzdeda
+
+
 <hr/>
 
 ## Credits
 
-* [oppo-source](https://github.com/oppo-source) 
+* [EndCredits](https://github.com/EndCredits)
 
 * [Mashopy](https://github.com/Mashopy) 
 
-* [youngguo18](https://github.com/youngguo18)
+* [oppo-source](https://github.com/oppo-source) 
 
-* [EndCredits](https://github.com/EndCredits)
+* [pomelohan](https://github.com/pomelohan)
+
+* [TingyiChen](https://github.com/TingyiChen)
+
+* [youngguo18](https://github.com/youngguo18)
 
 * ......
