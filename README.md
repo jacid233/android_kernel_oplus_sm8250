@@ -134,7 +134,7 @@ make -j8 -C $(pwd) O=$(pwd)/out CROSS_COMPILE=$BUILD_CROSS_COMPILE CLANG_TRIPLE=
 
 ## TWRP收集
 
-* ColorOS7.1 (wzsx150): https://wwfg.lanzoum.com/i8fh90kt6jch
+* ColorOS7.1 (wzsx150): https://wwfg.lanzoum.com/i8rcF09kvzta
 * ColorOS11 (残芯): https://wwfg.lanzoum.com/i9mPA0ztcggj
 
 <br/>
