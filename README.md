@@ -53,7 +53,7 @@ make -j8 -C $(pwd) O=$(pwd)/out CROSS_COMPILE=$BUILD_CROSS_COMPILE CLANG_TRIPLE=
 
 * oss-r: vendor/op4ad9-perf_defconfig
 
-* oss-q: vendor/op4ad9-perf_defconfig
+* oss-q: stock_defconfig
 
 ## 其余分支是干嘛的
 
