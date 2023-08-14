@@ -27,10 +27,10 @@
 #define PARAMETER_NUM 25
 #define FEATURE_NUM 10
 
-#ifndef USES_LEGACY_SENSOR_DEVINFO
-#define SOURCE_NUM 3
-#else
+#if defined(CONFIG_OPLUS_LEGACY_SENSOR_DEVINFO)
 #define SOURCE_NUM 2
+#else
+#define SOURCE_NUM 3
 #endif
 
 #define ALGO_PARAMETER_NUM 15
